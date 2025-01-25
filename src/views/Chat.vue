@@ -10,52 +10,31 @@
               <h3>好友列表 ({{ contactTotal }})</h3>
               <div class="header-badges">
                 <el-badge :value="friendApplyCount" :hidden="friendApplyCount === 0" class="apply-badge">
-                  <el-button 
-                    :icon="Bell"
-                    class="action-btn"
-                    @click="showFriendApplyDialog = true"
-                  >
+                  <el-button :icon="Bell" class="action-btn" @click="showFriendApplyDialog = true">
                     好友申请
                   </el-button>
                 </el-badge>
               </div>
             </div>
             <div class="header-actions">
-              <el-button 
-                type="primary" 
-                :icon="Plus"
-                class="action-btn"
-                @click="showFriendDialog = true"
-              >
+              <el-button type="primary" :icon="Plus" class="action-btn" @click="showFriendDialog = true">
                 添加好友
               </el-button>
-              <el-button 
-                :type="isManageMode ? 'success' : 'default'"
-                :icon="Setting"
-                class="action-btn"
-                @click="isManageMode = !isManageMode"
-              >
+              <el-button :type="isManageMode ? 'success' : 'default'" :icon="Setting" class="action-btn"
+                @click="isManageMode = !isManageMode">
                 {{ isManageMode ? '完成管理' : '好友管理' }}
               </el-button>
             </div>
           </div>
         </div>
         <div class="contact-search">
-          <el-input
-            v-model="searchQuery"
-            placeholder="搜索好友"
-            prefix-icon="Search"
-            clearable
-          />
+          <el-input v-model="searchQuery" placeholder="搜索好友" prefix-icon="Search" clearable />
         </div>
         <div class="contact-items">
-          <div v-for="contact in filteredContacts" 
-               :key="contact.userInfo.userId" 
-               class="contact-item"
-               :class="{ 
-                 active: currentChat?.userInfo.userId === contact.userInfo.userId && !isManageMode,
-                 'manage-mode': isManageMode 
-               }">
+          <div v-for="contact in filteredContacts" :key="contact.userInfo.userId" class="contact-item" :class="{
+            active: currentChat?.userInfo.userId === contact.userInfo.userId && !isManageMode,
+            'manage-mode': isManageMode
+          }">
             <div class="contact-main" @click="!isManageMode && selectChat(contact)">
               <el-avatar :size="40" :src="contact.userInfo.userPhoto" />
               <div class="contact-info">
@@ -68,32 +47,19 @@
                 <div class="last-message" v-if="!isManageMode">
                   {{ contact.lastMessage || '暂无消息' }}
                 </div>
-                <div class="friend-phone" v-else>
-                  {{ contact.userInfo.userPhone }}
-                </div>
               </div>
             </div>
-            
+
             <!-- 管理模式下的操作按钮 -->
             <div v-if="isManageMode" class="manage-actions">
-              <el-button 
-                link 
-                type="primary" 
-                size="small"
-                @click="editFriendName(contact)"
-              >
+              <el-button link type="primary" size="small" @click="editFriendName(contact)">
                 修改备注
               </el-button>
-              <el-button 
-                link 
-                type="danger" 
-                size="small"
-                @click="deleteFriend(contact.userInfo.userId)"
-              >
+              <el-button link type="danger" size="small" @click="deleteFriend(contact.userInfo.userId)">
                 删除
               </el-button>
             </div>
-            
+
             <!-- 非管理模式下显示最后消息时间和未读数 -->
             <div v-else class="contact-meta">
               <span class="message-time">{{ formatTime(Number(contact.lastMessageTime) || 0) }}</span>
@@ -102,12 +68,12 @@
           </div>
 
           <!-- 加载更多 -->
-          <div v-if="contacts.length < contactTotal" 
-               class="load-more"
-               :class="{ 'is-loading': loadingContacts }"
-               @click="handleContactPageChange(contactPage + 1)">
+          <div v-if="contacts.length < contactTotal" class="load-more" :class="{ 'is-loading': loadingContacts }"
+            @click="handleContactPageChange(contactPage + 1)">
             <span v-if="!loadingContacts">加载更多</span>
-            <el-icon v-else class="is-loading"><Loading /></el-icon>
+            <el-icon v-else class="is-loading">
+              <Loading />
+            </el-icon>
           </div>
         </div>
       </el-aside>
@@ -115,11 +81,7 @@
       <!-- 好友搜索对话框 -->
       <el-dialog v-model="showFriendDialog" title="添加好友" width="500px">
         <div class="friend-search">
-          <el-input
-            v-model="friendSearchKey"
-            placeholder="搜索用户名/手机号"
-            @keyup.enter="searchFriends"
-          >
+          <el-input v-model="friendSearchKey" placeholder="搜索用户名/手机号" @keyup.enter="searchFriends">
             <template #append>
               <el-button @click="searchFriends">搜索</el-button>
             </template>
@@ -133,26 +95,13 @@
               <div class="friend-name">{{ user.userName }}</div>
               <div class="friend-phone">{{ user.userPhone }}</div>
             </div>
-            <el-button 
-              type="primary" 
-              size="small" 
-              :icon="Plus"
-              class="add-friend-btn"
-              @click="addFriend(user.userId)"
-            >
+            <el-button type="primary" size="small" :icon="Plus" class="add-friend-btn" @click="addFriend(user.userId)">
               加为好友
             </el-button>
           </div>
 
-          <el-pagination
-            v-if="searchTotal > 0"
-            :current-page="searchPage"
-            :page-size="searchPageSize"
-            :total="searchTotal"
-            @current-change="handleSearchPageChange"
-            layout="prev, pager, next"
-            background
-          />
+          <el-pagination v-if="searchTotal > 0" :current-page="searchPage" :page-size="searchPageSize"
+            :total="searchTotal" @current-change="handleSearchPageChange" layout="prev, pager, next" background />
         </div>
       </el-dialog>
 
@@ -170,24 +119,13 @@
               </div>
               <div class="friend-phone">{{ friend.userInfo.userPhone }}</div>
             </div>
-            <el-button 
-              type="danger" 
-              size="small" 
-              @click="deleteFriend(friend.userInfo.userId)"
-            >
+            <el-button type="danger" size="small" @click="deleteFriend(friend.userInfo.userId)">
               删除
             </el-button>
           </div>
 
-          <el-pagination
-            v-if="friendTotal > 0"
-            :current-page="friendPage"
-            :page-size="friendPageSize"
-            :total="friendTotal"
-            @current-change="handleFriendPageChange"
-            layout="prev, pager, next"
-            background
-          />
+          <el-pagination v-if="friendTotal > 0" :current-page="friendPage" :page-size="friendPageSize"
+            :total="friendTotal" @current-change="handleFriendPageChange" layout="prev, pager, next" background />
         </div>
       </el-dialog>
 
@@ -204,32 +142,18 @@
               </div>
             </div>
             <div class="apply-actions">
-              <el-button 
-                type="primary" 
-                size="small"
-                @click="handleAccept(apply)"
-              >
+              <el-button type="primary" size="small" @click="handleAccept(apply)">
                 同意
               </el-button>
-              <el-button 
-                type="danger" 
-                size="small"
-                @click="handleReject(apply)"
-              >
+              <el-button type="danger" size="small" @click="handleReject(apply)">
                 拒绝
               </el-button>
             </div>
           </div>
-          
-          <el-pagination
-            v-if="friendApplyTotal > 0"
-            :current-page="friendApplyPage"
-            :page-size="friendApplyPageSize"
-            :total="friendApplyTotal"
-            @current-change="handleFriendApplyPageChange"
-            layout="prev, pager, next"
-            background
-          />
+
+          <el-pagination v-if="friendApplyTotal > 0" :current-page="friendApplyPage" :page-size="friendApplyPageSize"
+            :total="friendApplyTotal" @current-change="handleFriendApplyPageChange" layout="prev, pager, next"
+            background />
         </div>
       </el-dialog>
 
@@ -249,19 +173,27 @@
               加载更多...
             </div>
 
-            <div v-for="msg in currentMessages" 
-                 :key="msg.messageId" 
-                 :id="'msg-' + msg.messageId"
-                 class="message-item"
-                 :class="{
-                   'message-self': msg.userId === userInfo?.userId,
-                   'message-unread': msg.messageStatus === 'offline'
-                 }">
+            <div v-for="msg in currentMessages" :key="msg.messageId" :id="'msg-' + msg.messageId" class="message-item"
+              :class="{
+                'message-self': msg.userId === userInfo?.userId,
+                'message-unread': msg.messageStatus === 'offline'
+              }">
               <el-avatar :size="36"
                 :src="msg.userId === userInfo?.userId ? userInfo?.userPhoto : currentChat?.userInfo.userPhoto" />
               <div class="message-content">
                 <div class="message-bubble">
-                  {{ msg.messageContent }}
+                  <!-- 根据消息类型显示不同内容 -->
+                  <template v-if="msg.messageType === MessageType.TEXT">
+                    {{ msg.messageContent }}
+                  </template>
+                  <template v-else-if="msg.messageType === MessageType.PHOTO">
+                    <el-image 
+                      :src="msg.messageContent"
+                      class="message-image"
+                      :preview-src-list="[msg.messageContent]"
+                      style="width: 100px; height: 100px; object-fit: cover;"
+                    />
+                  </template>
                 </div>
                 <div class="message-time">{{ formatTime(msg.timestamp) }}</div>
               </div>
@@ -270,15 +202,23 @@
 
           <div class="chat-input">
             <div class="input-toolbar">
-              <el-button-group>
-                <el-button :icon="Picture" @click="handleImageUpload" />
-              </el-button-group>
+              <el-upload v-if="!imageToSend" class="image-uploader" :action="uploadAction"
+                :before-upload="beforeImageUpload" :http-request="handleImageUpload" :show-file-list="false"
+                accept="image/*">
+                <el-button :icon="Picture">
+                  添加图片
+                </el-button>
+              </el-upload>
             </div>
 
             <!-- 添加图片预览区域 -->
             <div v-if="imageToSend" class="image-preview">
               <el-image :src="imageToSend" class="preview-image" />
-              <el-button class="remove-image" circle icon="Close" @click="imageToSend = null" />
+              <el-button class="remove-image" circle @click="removeImage">
+                <el-icon>
+                  <Close />
+                </el-icon>
+              </el-button>
             </div>
 
             <el-input v-model="messageInput" type="textarea" :rows="3" placeholder="输入消息..."
@@ -305,8 +245,8 @@ import { ref, computed, onMounted, nextTick, onBeforeUnmount } from 'vue'
 import { useUserStore } from '@/stores/user'
 import { storeToRefs } from 'pinia'
 import AppHeader from '@/components/AppHeader.vue'
-import { Picture, Loading, Plus, Setting, Bell } from '@element-plus/icons-vue'
-import { ElMessage, ElLoading, ElMessageBox } from 'element-plus'
+import { Picture, Loading, Plus, Setting, Bell, Close } from '@element-plus/icons-vue'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import { wsService } from '@/services/modules/websocket'
 import dayjs from 'dayjs'
 import { useUploadApi } from '@/services/modules/upload'
@@ -333,7 +273,7 @@ const currentChat = ref<Contact | null>(null)
 const messageInput = ref('')
 const messageContainer = ref<HTMLElement | null>(null)
 const currentMessages = ref<MessageVO[]>([])
-const imageToSend = ref<File | null>(null)
+const imageToSend = ref('')
 const currentPage = ref(1)
 const pageSize = ref(20)
 const loading = ref(false)
@@ -374,7 +314,7 @@ const isManageMode = ref(false) // 是否处于好友管理模式
 // 过滤联系人
 const filteredContacts = computed(() => {
   if (!searchQuery.value) return contacts.value
-  
+
   const query = searchQuery.value.toLowerCase()
   return contacts.value.filter(contact => {
     const displayName = contact.friendName || contact.userInfo.userName
@@ -388,7 +328,7 @@ const selectChat = async (contact: Contact) => {
   currentPage.value = 1
   currentMessages.value = []
   hasMore.value = true
-  
+
   // 清除未读数
   if (contact.unreadCount) {
     const contactIndex = contacts.value.findIndex(c => c.userInfo.userId === contact.userInfo.userId)
@@ -396,31 +336,57 @@ const selectChat = async (contact: Contact) => {
       contacts.value[contactIndex].unreadCount = 0
     }
   }
-  
+
   await loadHistoryMessages(contact.userInfo.userId)
   await nextTick()
   scrollToBottom()
 }
 
-// 处理图片选择
-const handleImageUpload = async () => {
-  const input = document.createElement('input')
-  input.type = 'file'
-  input.accept = 'image/*'
+// 图片上传相关
+const uploadAction = ref('/api/oss/file/upload')
 
-  input.onchange = async (event) => {
-    const target = event.target as HTMLInputElement
-    if (!target.files?.length) return
-    imageToSend.value = target.files[0]
-  }
-
-  input.click()
+// 移除图片
+const removeImage = () => {
+  imageToSend.value = ''
 }
 
-// 发送消息
+// 图片上传前的验证
+const beforeImageUpload = (file: File) => {
+  const isImage = file.type.startsWith('image/')
+  const isLt2M = file.size / 1024 / 1024 < 2
+
+  if (!isImage) {
+    ElMessage.error('只能上传图片文件!')
+    return false
+  }
+  if (!isLt2M) {
+    ElMessage.error('图片大小不能超过 2MB!')
+    return false
+  }
+  return true
+}
+
+// 处理图片上传
+const handleImageUpload = async (options: any) => {
+  try {
+    const formData = new FormData()
+    formData.append('imageFile', options.file)
+    const { fileUrl } = await useUploadApi.uploadImage(formData)
+    imageToSend.value = fileUrl
+    ElMessage.success('图片上传成功')
+  } catch (error: any) {
+    ElMessage.error(error.message || '图片上传失败')
+  }
+}
+
+// 修改发送消息方法
 const sendMessage = async () => {
   if (!currentChat.value || !userInfo.value) return
 
+  // 创建一个新的消息数组，用于按顺序发送
+  const messagesToSend = []
+  
+  // 如果有文本消息，先添加文本消息
   if (messageInput.value.trim()) {
     const textMessage: MessageSend = {
       messageType: MessageType.TEXT,
@@ -429,71 +395,47 @@ const sendMessage = async () => {
       userId: userInfo.value.userId,
       timestamp: Date.now()
     }
-
-    wsService.send(textMessage)
-    currentMessages.value.push({
-      ...textMessage,
-      messageId: `temp_${Date.now()}`,
-      messageStatus: 'online'
-    })
-    
-    // 更新联系人最后一条消息
-    updateContactLastMessage({
-      ...textMessage,
-      messageId: `temp_${Date.now()}`,
-      messageStatus: 'online'
-    })
-    
-    messageInput.value = ''
-    
-    // 等待DOM更新后滚动到底部
-    await nextTick()
-    scrollToBottom()
+    messagesToSend.push(textMessage)
   }
 
-  // 如果有图片，发送图片
+  // 如果有图片消息，再添加图片消息
   if (imageToSend.value) {
-    try {
-      const loadingInstance = ElLoading.service({
-        text: '图片上传中...',
-        background: 'rgba(0, 0, 0, 0.7)'
-      })
-
-      const formData = new FormData()
-      formData.append('file', imageToSend.value)
-
-      const { fileUrl } = await useUploadApi.uploadImage(formData)
-      loadingInstance.close()
-
-      const imageMessage: MessageSend = {
-        messageType: MessageType.PHOTO,
-        messageContent: fileUrl,
-        toUserId: currentChat.value.userInfo.userId,
-        userId: userInfo.value.userId,
-        timestamp: Date.now()
-      }
-
-      wsService.send(imageMessage)
-      const newMessage = {
-        ...imageMessage,
-        messageId: `temp_${Date.now()}`,
-        messageStatus: 'online'
-      }
-      currentMessages.value.push(newMessage)
-      
-      // 更新联系人最后一条消息
-      updateContactLastMessage(newMessage)
-
-      imageToSend.value = null
-      
-      // 等待DOM更新后滚动到底部
-      await nextTick()
-      scrollToBottom()
-    } catch (error) {
-      ElMessage.error('图片上传失败')
-      console.error('图片上传失败:', error)
+    const imageMessage: MessageSend = {
+      messageType: MessageType.PHOTO,
+      messageContent: imageToSend.value,
+      toUserId: currentChat.value.userInfo.userId,
+      userId: userInfo.value.userId,
+      timestamp: Date.now() + 1 // 确保图片消息的时间戳晚于文本消息
     }
+    messagesToSend.push(imageMessage)
   }
+
+  // 按顺序发送消息
+  for (const message of messagesToSend) {
+    wsService.send(message)
+    currentMessages.value.push({
+      ...message,
+      messageId: `temp_${message.timestamp}`,
+      messageStatus: 'online'
+    })
+  }
+
+  // 更新联系人最后一条消息
+  if (messagesToSend.length > 0) {
+    const lastMessage = {
+      ...messagesToSend[messagesToSend.length - 1],
+      messageId: `temp_${Date.now()}`,
+      messageStatus: 'online'
+    } as MessageVO
+    updateContactLastMessage(lastMessage)
+  }
+
+  // 清空输入
+  messageInput.value = ''
+  imageToSend.value = ''
+
+  await nextTick()
+  scrollToBottom()
 }
 
 // 滚动到底部
@@ -524,7 +466,7 @@ const loadHistoryMessages = async (userId: string, isLoadMore = false) => {
     }
 
     // 检查未读消息
-    const offlineMessages = pageInfo.data.filter((msg: MessageVO) => 
+    const offlineMessages = pageInfo.data.filter((msg: MessageVO) =>
       msg.messageStatus === 'offline' && // 消息未读
       msg.toUserId === userInfo.value?.userId // 接收者是当前用户
     )
@@ -536,9 +478,9 @@ const loadHistoryMessages = async (userId: string, isLoadMore = false) => {
         messageId: msg.messageId,
         timestamp: msg.timestamp
       }))
-      
+
       await useMessageApi.changeStatus({ messageReqDTOList })
-      
+
       // 更新本地消息状态
       pageInfo.data.forEach(msg => {
         if (offlineMessages.some(offline => offline.messageId === msg.messageId)) {
@@ -579,14 +521,14 @@ const loadHistoryMessages = async (userId: string, isLoadMore = false) => {
 // 获取可见消息
 const getVisibleMessages = (container: HTMLElement): MessageVO[] => {
   if (!container || !currentMessages.value) return []
-  
+
   try {
     const containerRect = container.getBoundingClientRect()
-    
+
     return currentMessages.value.filter(msg => {
       const msgElement = document.getElementById(`msg-${msg.messageId}`)
       if (!msgElement) return false
-      
+
       const msgRect = msgElement.getBoundingClientRect()
       return msgRect.top >= containerRect.top && msgRect.bottom <= containerRect.bottom
     })
@@ -599,14 +541,14 @@ const getVisibleMessages = (container: HTMLElement): MessageVO[] => {
 // 处理滚动事件
 const handleScroll = async (e: Event) => {
   if (!e.target) return
-  
+
   const target = e.target as HTMLElement
   const visibleMessages = getVisibleMessages(target)
-  
+
   if (visibleMessages.length > 0) {
     handleMessageScroll(visibleMessages)
   }
-  
+
   // 检查是否需要加载更多历史消息
   if (target.scrollTop <= 50 && !loading.value && hasMore.value && currentChat.value) {
     await loadHistoryMessages(currentChat.value.userInfo.userId, true)
@@ -616,13 +558,13 @@ const handleScroll = async (e: Event) => {
 // 标记消息已读
 const markMessagesAsRead = async (messages: MessageVO[]) => {
   if (!userInfo.value?.userId) return
-  
+
   try {
-    const unreadMessages = messages.filter(msg => 
+    const unreadMessages = messages.filter(msg =>
       msg.userId !== userInfo.value?.userId && // 发送方不是自己
       msg.messageStatus === 'offline' // 消息状态为未读
     )
-    
+
     if (unreadMessages.length > 0) {
       const messageReqDTOList = unreadMessages.map(msg => ({
         userId: msg.userId,
@@ -630,19 +572,19 @@ const markMessagesAsRead = async (messages: MessageVO[]) => {
         messageId: msg.messageId,
         timestamp: msg.timestamp
       }))
-      
+
       await useMessageApi.changeStatus({ messageReqDTOList })
-      
+
       // 更新本地消息状态
       messages.forEach(msg => {
         if (unreadMessages.some(unread => unread.messageId === msg.messageId)) {
           msg.messageStatus = 'online'
         }
       })
-      
+
       // 更新联系人未读数
       if (currentChat.value) {
-        const contact = contacts.value.find(c => 
+        const contact = contacts.value.find(c =>
           c.userInfo.userId === currentChat.value?.userInfo.userId
         )
         if (contact) {
@@ -666,7 +608,7 @@ const handleMessageScroll = (visibleMessages: MessageVO[]) => {
 // 格式化时间
 const formatTime = (timestamp: number) => {
   if (!timestamp) return ''
-  
+
   const messageDate = dayjs(timestamp)
   const now = dayjs()
 
@@ -683,7 +625,7 @@ const formatTime = (timestamp: number) => {
 // 加载联系人列表
 const loadContacts = async (isLoadMore = false) => {
   if (loadingContacts.value || !userInfo.value?.userId) return
-  
+
   try {
     loadingContacts.value = true
     const response = await useFriendApi.page({
@@ -702,9 +644,9 @@ const loadContacts = async (isLoadMore = false) => {
           })
           return {
             ...friend,
-            lastMessage: lastMessage?.messageContent,
-            lastMessageTime: lastMessage?.timestamp,
-            unreadCount: 0 // 这里也可以从后端获取未读数
+            lastMessage: lastMessage?.messageType === MessageType.PHOTO ? '[图片]' : lastMessage?.messageContent,
+            lastMessageTime: lastMessage?.timestamp?.toString(),
+            unreadCount: 0
           }
         } catch (error) {
           console.error('获取最后消息失败:', error)
@@ -718,6 +660,20 @@ const loadContacts = async (isLoadMore = false) => {
       })
 
       const newContacts = await Promise.all(lastMessagesPromises)
+
+      // 获取未读消息数量
+      const userIds = newContacts.map(contact => contact.userInfo.userId)
+      const offlineCountMap = await useMessageApi.getOfflineMessageCount({
+        userIds,
+        userId: userInfo.value.userId
+      })
+
+      console.log('offlineCountMap',offlineCountMap)
+
+      // 更新未读消息数量
+      newContacts.forEach(contact => {
+        contact.unreadCount = offlineCountMap[contact.userInfo.userId] || 0
+      })
 
       // 如果是加载更多，则追加数据
       if (isLoadMore) {
@@ -744,29 +700,40 @@ const handleContactPageChange = async (page: number) => {
 const handleNewMessage = async (message: MessageVO) => {
   // 如果是当前聊天对象的消息，添加到消息列表末尾
   if (currentChat.value?.userInfo.userId === (message.userId === userInfo.value?.userId ? message.toUserId : message.userId)) {
-    currentMessages.value.push({
+    const newMessage = {
       ...message,
       messageId: `temp_${Date.now()}`,
       messageStatus: 'online'
-    })
+    }
+
+    // 根据消息类型处理消息内容
+    if (message.messageType === MessageType.PHOTO) {
+      // 如果是图片消息，messageContent 是图片 URL
+      newMessage.messageContent = message.messageContent // 图片URL
+    } else if (message.messageType === MessageType.TEXT) {
+      // 如果是文本消息，保持原样
+      newMessage.messageContent = message.messageContent
+    }
+
+    currentMessages.value.push(newMessage)
     // 等待DOM更新后滚动到底部
     await nextTick()
     scrollToBottom()
   }
 
   // 更新联系人列表的最后消息
-  updateContactLastMessage(message)
+  updateContactLastMessage({
+    ...message,
+    // 如果是图片消息，在联系人列表显示 [图片]
+    messageContent: message.messageType === MessageType.PHOTO ? '[图片]' : message.messageContent
+  })
 }
 
 // 更新联系人最后消息
 const updateContactLastMessage = (message: MessageVO) => {
   if (!userInfo.value) return
   
-  // 确定消息相关的联系人ID
-  const contactId = message.userId === userInfo.value.userId 
-    ? message.toUserId 
-    : message.userId
-    
+  const contactId = message.userId === userInfo.value.userId ? message.toUserId : message.userId
   const contactIndex = contacts.value.findIndex(c => c.userInfo.userId === contactId)
   
   if (contactIndex === -1) {
@@ -779,9 +746,9 @@ const updateContactLastMessage = (message: MessageVO) => {
   // 创建更新后的联系人对象
   const updatedContact = {
     ...contacts.value[contactIndex],
-    lastMessage: message.messageContent,
+    // 如果是图片消息，显示[图片]，否则显示消息内容
+    lastMessage: message.messageType === MessageType.PHOTO ? '[图片]' : message.messageContent,
     lastMessageTime: (message.timestamp || Date.now()).toString(),
-    // 只有在不是当前聊天对象时才增加未读数
     unreadCount: message.userId !== userInfo.value.userId && 
                  currentChat.value?.userInfo.userId !== contactId 
                  ? (contacts.value[contactIndex].unreadCount || 0) + 1 
@@ -872,12 +839,12 @@ const addFriend = async (friendId: string) => {
       }
     )
 
-    await useFriendApi.addFriendApply({ 
+    await useFriendApi.addFriendApply({
       userId: userInfo.value?.userId || '',
       appliedId: friendId,
       description: description
     })
-    
+
     ElMessage.success('申请已发送')
     showFriendDialog.value = false // 关闭搜索对话框
   } catch (error: any) {
@@ -910,7 +877,7 @@ const editFriendName = async (friend: FriendResp) => {
       confirmButtonText: '确定',
       cancelButtonText: '取消'
     })
-    
+
     await useFriendApi.updateName({
       userId: userInfo.value?.userId || '',
       friendId: friend.userInfo.userId,
@@ -933,7 +900,7 @@ const deleteFriend = async (friendId: string) => {
       confirmButtonText: '确定',
       cancelButtonText: '取消'
     })
-    
+
     await useFriendApi.delete({ friendId })
     ElMessage.success('删除成功')
     loadContacts()
@@ -1022,11 +989,13 @@ const loadFriendApplies = async () => {
   padding: 80px 20px 20px;
   box-sizing: border-box;
   position: relative;
-  overflow: hidden; /* 防止滚动 */
+  overflow: hidden;
+  /* 防止滚动 */
 }
 
 .chat-container {
-  height: calc(100vh - 100px); /* 减去上下padding和header高度 */
+  height: calc(100vh - 100px);
+  /* 减去上下padding和header高度 */
   max-width: 1200px;
   margin: 0 auto;
   background: white;
@@ -1049,7 +1018,8 @@ const loadFriendApplies = async () => {
   padding: 16px;
   border-bottom: 1px solid #ebeef5;
   background: white;
-  flex-shrink: 0; /* 防止头部压缩 */
+  flex-shrink: 0;
+  /* 防止头部压缩 */
 }
 
 .header-content {
@@ -1082,11 +1052,13 @@ const loadFriendApplies = async () => {
   padding: 12px;
   background: white;
   border-bottom: 1px solid #ebeef5;
-  flex-shrink: 0; /* 防止搜索框压缩 */
+  flex-shrink: 0;
+  /* 防止搜索框压缩 */
 }
 
 .contact-items {
-  flex: 1; /* 占据剩余空间 */
+  flex: 1;
+  /* 占据剩余空间 */
   overflow-y: auto;
   background: white;
 }
@@ -1113,7 +1085,8 @@ const loadFriendApplies = async () => {
   display: flex;
   align-items: center;
   min-width: 0;
-  padding-right: 8px; /* 为右侧内容预留空间 */
+  padding-right: 8px;
+  /* 为右侧内容预留空间 */
 }
 
 .contact-info {
@@ -1121,7 +1094,8 @@ const loadFriendApplies = async () => {
   flex: 1;
   min-width: 0;
   margin-right: 8px;
-  overflow: hidden; /* 防止内容溢出 */
+  overflow: hidden;
+  /* 防止内容溢出 */
 }
 
 .contact-name {
@@ -1131,12 +1105,15 @@ const loadFriendApplies = async () => {
   align-items: center;
   gap: 8px;
   min-width: 0;
-  flex-wrap: wrap; /* 允许内容换行 */
+  flex-wrap: wrap;
+  /* 允许内容换行 */
 }
 
 .contact-name .el-tag {
-  flex-shrink: 0; /* 防止标签被压缩 */
-  max-width: 120px; /* 限制标签最大宽度 */
+  flex-shrink: 0;
+  /* 防止标签被压缩 */
+  max-width: 120px;
+  /* 限制标签最大宽度 */
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -1155,8 +1132,10 @@ const loadFriendApplies = async () => {
 .manage-actions {
   display: flex;
   gap: 8px;
-  margin-left: auto; /* 推到右侧 */
-  flex-shrink: 0; /* 防止按钮被压缩 */
+  margin-left: auto;
+  /* 推到右侧 */
+  flex-shrink: 0;
+  /* 防止按钮被压缩 */
 }
 
 .manage-mode {
@@ -1170,12 +1149,14 @@ const loadFriendApplies = async () => {
 .manage-mode .contact-main {
   flex: 1;
   min-width: 0;
-  margin-right: 8px; /* 为操作按钮预留空间 */
+  margin-right: 8px;
+  /* 为操作按钮预留空间 */
 }
 
 /* 管理模式下的标签样式调整 */
 .manage-mode .el-tag {
-  flex-shrink: 0; /* 防止标签被压缩 */
+  flex-shrink: 0;
+  /* 防止标签被压缩 */
 }
 
 .contact-meta {
@@ -1201,13 +1182,15 @@ const loadFriendApplies = async () => {
   padding: 0;
   background: white;
   min-width: 600px;
-  height: 100%; /* 占满容器高度 */
+  height: 100%;
+  /* 占满容器高度 */
 }
 
 .chat-header {
   padding: 16px;
   border-bottom: 1px solid #e6e6e6;
-  flex-shrink: 0; /* 防止头部压缩 */
+  flex-shrink: 0;
+  /* 防止头部压缩 */
 }
 
 .chat-header h3 {
@@ -1216,7 +1199,8 @@ const loadFriendApplies = async () => {
 }
 
 .message-container {
-  flex: 1; /* 自动占据剩余空间 */
+  flex: 1;
+  /* 自动占据剩余空间 */
   overflow-y: auto;
   padding: 20px;
   background: #f5f7fa;
@@ -1262,7 +1246,8 @@ const loadFriendApplies = async () => {
   padding: 16px;
   border-top: 1px solid #e6e6e6;
   background: white;
-  flex-shrink: 0; /* 防止输入框压缩 */
+  flex-shrink: 0;
+  /* 防止输入框压缩 */
 }
 
 .input-toolbar {
@@ -1299,7 +1284,8 @@ const loadFriendApplies = async () => {
 }
 
 .no-chat {
-  flex: 1; /* 自动占据剩余空间 */
+  flex: 1;
+  /* 自动占据剩余空间 */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1312,12 +1298,13 @@ const loadFriendApplies = async () => {
 
 .image-preview {
   position: relative;
-  display: inline-block;
   margin: 8px 0;
+  width: fit-content;
 }
 
 .preview-image {
-  max-height: 100px;
+  max-width: 200px;
+  max-height: 200px;
   border-radius: 4px;
 }
 
@@ -1326,7 +1313,6 @@ const loadFriendApplies = async () => {
   top: -8px;
   right: -8px;
   padding: 4px;
-  font-size: 12px;
 }
 
 @media (max-width: 768px) {
@@ -1481,6 +1467,7 @@ const loadFriendApplies = async () => {
   from {
     transform: rotate(0deg);
   }
+
   to {
     transform: rotate(360deg);
   }
@@ -1517,7 +1504,8 @@ const loadFriendApplies = async () => {
   display: flex;
   gap: 8px;
   align-items: center;
-  margin-left: auto; /* 将按钮推到右侧 */
+  margin-left: auto;
+  /* 将按钮推到右侧 */
 }
 
 .header-top {
@@ -1556,6 +1544,14 @@ const loadFriendApplies = async () => {
 
 /* 管理模式下的样式调整 */
 .manage-mode .contact-name {
-  margin-right: 8px; /* 为管理按钮预留空间 */
+  margin-right: 8px;
+  /* 为管理按钮预留空间 */
+}
+
+.message-image {
+  width: 100px;
+  height: 100px;
+  border-radius: 4px;
+  object-fit: cover;
 }
 </style>

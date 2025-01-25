@@ -16,5 +16,11 @@ export const useMessageApi = {
   // 获取最后一条消息
   getLastMessage(params: MessageLastQuery) {
     return http.get<MessageVO>('/message-netty/last-message', { params })
+  },
+
+  // 获取离线消息数量
+  getOfflineMessageCount(params: { userIds: string[], userId: string }) {
+    return http.get<Record<string, number>>('/message-netty/offline/count', { params })
   }
+
 } 
