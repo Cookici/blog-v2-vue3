@@ -30,6 +30,16 @@ export interface ArticlePageQuery {
 }
 
 // 分页查询参数
+export interface ArticleLikePageQuery {
+  userId: string
+  page: number
+  pageSize: number
+  articleTitle?: string
+  articleContent?: string
+  labelNameList?: string[]
+}
+
+// 分页查询参数
 export interface ArticleUserPageQuery {
   userId: string
   page: number
@@ -58,4 +68,13 @@ export interface UserArticleDataDTO {
   viewCount: number;
   commentCount: number;
   friendApplyCount: number;
+}
+
+export interface ArticleRecommendQuery{
+  userId :string,
+  page: number,
+  pageSize: number,
+  articleTitle?: string,
+  articleContent?: string,
+  labelNameList?: string[]
 }

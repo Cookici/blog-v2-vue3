@@ -4,7 +4,9 @@ import type {
     ArticlePageQuery,
     CreateArticleParams,
     UserArticleDataDTO,
-    ArticleUserPageQuery
+    ArticleUserPageQuery,
+    ArticleRecommendQuery,
+    ArticleLikePageQuery
 } from '@/types/article'
 
 import type { PageDTO } from '@/services/types'
@@ -61,7 +63,7 @@ export const useArticleApi = {
     },
 
     //获取用户信息
-    userArticleData(){
+    userArticleData() {
         return http.get<UserArticleDataDTO>('/article/userArticleData');
     },
 
@@ -69,4 +71,15 @@ export const useArticleApi = {
     getUserArticles(params: ArticleUserPageQuery) {
         return http.get<PageDTO<ArticleDTO>>('/article/user/page', { params })
     },
+
+    // 获取用户推荐的文章列表
+    getUserRecommendArticles(params: ArticleRecommendQuery) {
+        return http.get<PageDTO<ArticleDTO>>('/article/recommend', { params })
+    },
+
+    //获取用户喜欢的文章列表
+    getLikePage(params: ArticleLikePageQuery) {
+        return http.get<PageDTO<ArticleDTO>>('/article/like/page', { params })
+    }
+
 } 

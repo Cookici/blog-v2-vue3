@@ -7,53 +7,41 @@
           <el-form :model="searchForm" class="search-form">
             <div class="search-inputs">
               <el-form-item>
-                <el-input
-                  v-model="searchForm.articleTitle"
-                  placeholder="搜索文章标题"
-                  clearable
-                  @clear="handleSearch"
-                >
+                <el-input v-model="searchForm.articleTitle" placeholder="搜索文章标题" clearable @clear="handleSearch">
                   <template #prefix>
-                    <el-icon><Search /></el-icon>
+                    <el-icon>
+                      <Search />
+                    </el-icon>
                   </template>
                 </el-input>
               </el-form-item>
               <el-form-item>
-                <el-input
-                  v-model="searchForm.articleContent"
-                  placeholder="搜索文章内容"
-                  clearable
-                  @clear="handleSearch"
-                >
+                <el-input v-model="searchForm.articleContent" placeholder="搜索文章内容" clearable @clear="handleSearch">
                   <template #prefix>
-                    <el-icon><Document /></el-icon>
+                    <el-icon>
+                      <Document />
+                    </el-icon>
                   </template>
                 </el-input>
               </el-form-item>
               <el-form-item>
-                <el-select
-                  v-model="searchForm.labelNameList"
-                  multiple
-                  filterable
-                  clearable
-                  placeholder="选择标签筛选"
-                  @clear="handleSearch"
-                >
+                <el-select v-model="searchForm.labelNameList" multiple filterable clearable placeholder="选择标签筛选"
+                  @clear="handleSearch">
                   <template #prefix>
-                    <el-icon><Collection /></el-icon>
+                    <el-icon>
+                      <Collection />
+                    </el-icon>
                   </template>
-                  <el-option
-                    v-for="label in labelOptions"
-                    :key="label.labelId"
-                    :label="label.labelName"
-                    :value="label.labelName"
-                  />
+                  <el-option v-for="label in labelOptions" :key="label.labelId" :label="label.labelName"
+                    :value="label.labelName" />
                 </el-select>
               </el-form-item>
             </div>
             <el-form-item class="search-button">
               <el-button type="primary" @click="handleSearch">
-                <el-icon><Search /></el-icon>搜索
+                <el-icon>
+                  <Search />
+                </el-icon>搜索
               </el-button>
             </el-form-item>
           </el-form>
@@ -76,21 +64,21 @@
                   </div>
                   <div class="article-footer">
                     <div class="article-labels">
-                      <el-tag v-for="label in article.labels" 
-                        :key="label.labelId" 
-                        size="small" 
-                        class="label-tag"
-                      >
+                      <el-tag v-for="label in article.labels" :key="label.labelId" size="small" class="label-tag">
                         {{ label.labelName }}
                       </el-tag>
                     </div>
                     <div class="article-meta">
                       <div class="meta-item">
-                        <el-icon><View /></el-icon>
+                        <el-icon>
+                          <View />
+                        </el-icon>
                         {{ article.viewCount || 0 }}
                       </div>
                       <div class="meta-item">
-                        <el-icon><Star /></el-icon>
+                        <el-icon>
+                          <Star />
+                        </el-icon>
                         {{ article.likeCount || 0 }}
                       </div>
                       <span class="create-time">{{ formatDate(article.createTime) }}</span>
@@ -115,21 +103,21 @@
                   </div>
                   <div class="article-footer">
                     <div class="article-labels">
-                      <el-tag v-for="label in article.labels" 
-                        :key="label.labelId" 
-                        size="small" 
-                        class="label-tag"
-                      >
+                      <el-tag v-for="label in article.labels" :key="label.labelId" size="small" class="label-tag">
                         {{ label.labelName }}
                       </el-tag>
                     </div>
                     <div class="article-meta">
                       <div class="meta-item">
-                        <el-icon><View /></el-icon>
+                        <el-icon>
+                          <View />
+                        </el-icon>
                         {{ article.viewCount || 0 }}
                       </div>
                       <div class="meta-item">
-                        <el-icon><Heart /></el-icon>
+                        <el-icon>
+                          <Heart />
+                        </el-icon>
                         {{ article.likeCount || 0 }}
                       </div>
                       <span class="create-time">{{ formatDate(article.createTime) }}</span>
@@ -154,21 +142,21 @@
                   </div>
                   <div class="article-footer">
                     <div class="article-labels">
-                      <el-tag v-for="label in article.labels" 
-                        :key="label.labelId" 
-                        size="small" 
-                        class="label-tag"
-                      >
+                      <el-tag v-for="label in article.labels" :key="label.labelId" size="small" class="label-tag">
                         {{ label.labelName }}
                       </el-tag>
                     </div>
                     <div class="article-meta">
                       <div class="meta-item">
-                        <el-icon><View /></el-icon>
+                        <el-icon>
+                          <View />
+                        </el-icon>
                         {{ article.viewCount || 0 }}
                       </div>
                       <div class="meta-item">
-                        <el-icon><Heart /></el-icon>
+                        <el-icon>
+                          <Heart />
+                        </el-icon>
                         {{ article.likeCount || 0 }}
                       </div>
                       <span class="create-time">{{ formatDate(article.createTime) }}</span>
@@ -180,15 +168,9 @@
           </el-tabs>
 
           <div class="pagination-container">
-            <el-pagination
-              v-model:current-page="currentPage"
-              v-model:page-size="pageSize"
-              :total="total"
-              :page-sizes="[10, 20, 30, 50]"
-              layout="total, sizes, prev, pager, next, jumper"
-              @size-change="handleSizeChange"
-              @current-change="handleCurrentChange"
-            />
+            <el-pagination v-model:current-page="currentPage" v-model:page-size="pageSize" :total="total"
+              :page-sizes="[10, 20, 30, 50]" layout="total, sizes, prev, pager, next, jumper"
+              @size-change="handleSizeChange" @current-change="handleCurrentChange" />
           </div>
         </div>
       </el-main>
@@ -203,9 +185,14 @@ import AppHeader from '@/components/AppHeader.vue'
 import { useArticleApi } from '@/services/modules/article'
 import type { ArticleDTO } from '@/types/article'
 import { ElMessage } from 'element-plus'
-import { View,Star, Search, Document, Collection } from '@element-plus/icons-vue'
+import { View, Star, Search, Document, Collection } from '@element-plus/icons-vue'
 import { useLabelApi } from '@/services/modules/label'
 import type { LabelDTO } from '@/types/article'
+import { useUserStore } from '@/stores/user'
+import { storeToRefs } from 'pinia'
+
+const userStore = useUserStore()
+const { userInfo } = storeToRefs(userStore)
 
 const router = useRouter()
 const activeTab = ref('latest')
@@ -240,29 +227,46 @@ const handleSearch = () => {
 const loadArticles = async () => {
   try {
     loading.value = true
-    let apiMethod
     switch (activeTab.value) {
-      case 'hot':
-        apiMethod = useArticleApi.page
+      case 'like':
+        const likeParams = {
+          userId: userInfo.value?.userId || '',
+          page: currentPage.value,
+          pageSize: pageSize.value,
+          articleTitle: searchForm.value.articleTitle,
+          articleContent: searchForm.value.articleContent,
+          labelNameList: searchForm.value.labelNameList.length > 0 ? searchForm.value.labelNameList : undefined
+        }
+        const likeResponse = await useArticleApi.getLikePage(likeParams)
+        articles.value = likeResponse.data
+        total.value = likeResponse.total
         break
       case 'recommended':
-        apiMethod = useArticleApi.page
+        const recommendedParams = {
+          userId: userInfo.value?.userId || '',
+          page: currentPage.value,
+          pageSize: pageSize.value,
+          articleTitle: searchForm.value.articleTitle,
+          articleContent: searchForm.value.articleContent,
+          labelNameList: searchForm.value.labelNameList.length > 0 ? searchForm.value.labelNameList : undefined
+        }
+        const recommendedResponse = await useArticleApi.getUserRecommendArticles(recommendedParams)
+        articles.value = recommendedResponse.data
+        total.value = recommendedResponse.total
         break
       default:
-        apiMethod = useArticleApi.page
+        const params = {
+          userId: userInfo.value?.userId || '',
+          page: currentPage.value,
+          pageSize: pageSize.value,
+          articleTitle: searchForm.value.articleTitle,
+          articleContent: searchForm.value.articleContent,
+          labelNameList: searchForm.value.labelNameList.length > 0 ? searchForm.value.labelNameList : undefined
+        }
+        const defaultResponse = await useArticleApi.page(params)
+        articles.value = defaultResponse.data
+        total.value = defaultResponse.total
     }
-
-    const params = {
-      page: currentPage.value,
-      pageSize: pageSize.value,
-      articleTitle: searchForm.value.articleTitle,
-      articleContent: searchForm.value.articleContent,
-      labelNameList: searchForm.value.labelNameList.length > 0 ? searchForm.value.labelNameList : undefined
-    }
-
-    const { data, total: totalCount } = await apiMethod(params)
-    articles.value = data
-    total.value = totalCount
   } catch (error: any) {
     ElMessage.error(error.message || '获取文章列表失败')
   } finally {
@@ -315,7 +319,8 @@ onMounted(() => {
 .app-container {
   min-height: 100vh;
   background-color: #f5f7fa;
-  padding-top: 60px; /* 为固定的 header 留出空间 */
+  padding-top: 60px;
+  /* 为固定的 header 留出空间 */
 }
 
 .main-container {
@@ -506,4 +511,4 @@ onMounted(() => {
     width: 100%;
   }
 }
-</style> 
+</style>

@@ -418,7 +418,7 @@ const loadComments = async () => {
       pageSize: pageSize.value
     })
 
-    if (!response) {
+    if (!response.data && !response.total) {
       comments.value = []
       total.value = 0
       return
