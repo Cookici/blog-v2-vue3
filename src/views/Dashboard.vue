@@ -139,6 +139,8 @@ const loadRecentArticles = async () => {
 }
 
 const loadStatsData = async () => {
+  if (!userInfo.value?.userId) return
+  
   try {
     const data = await useArticleApi.userArticleData()
     statsData.value = data
@@ -147,38 +149,43 @@ const loadStatsData = async () => {
   }
 }
 
-const statsCards = [
-  {
-    title: '我的文章',
-    value: computed(() => statsData.value.articleCount),
-    label: '总发布数',
-    icon: Document
-  },
-  {
-    title: '文章浏览',
-    value: computed(() => statsData.value.viewCount),
-    label: '总浏览量',
-    icon: View
-  },
-  {
-    title: '收到评论',
-    value: computed(() => statsData.value.commentCount),
-    label: '总评论数',
-    icon: ChatDotRound
-  },
-  {
-    title: '获得点赞',
-    value: computed(() => statsData.value.likeCount),
-    label: '总点赞数',
-    icon: Star
-  },
-  {
-    title: '好友申请',
-    value: computed(() => statsData.value.friendApplyCount),
-    label: '好友申请',
-    icon: Message
-  }
-]
+// 修改 statsCards 的计算方式
+const statsCards = computed(() => {
+  if (!userInfo.value?.userId) return []
+  
+  return [
+    {
+      title: '我的文章',
+      value: statsData.value.articleCount,
+      label: '总发布数',
+      icon: Document
+    },
+    {
+      title: '文章浏览',
+      value: statsData.value.viewCount,
+      label: '总浏览量',
+      icon: View
+    },
+    {
+      title: '收到评论',
+      value: statsData.value.commentCount,
+      label: '总评论数',
+      icon: ChatDotRound
+    },
+    {
+      title: '获得点赞',
+      value: statsData.value.likeCount,
+      label: '总点赞数',
+      icon: Star
+    },
+    {
+      title: '好友申请',
+      value: statsData.value.friendApplyCount,
+      label: '好友申请',
+      icon: Message
+    }
+  ]
+})
 
 onMounted(() => {
   loadStatsData()
@@ -365,4 +372,4 @@ const formatDateTime = (dateStr: string) => {
     grid-template-columns: 1fr;
   }
 }
-</style> 
+</style>

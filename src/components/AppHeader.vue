@@ -96,8 +96,11 @@ const handleLogout = async () => {
   
   try {
     isLoggingOut.value = true
-    await useUserApi.logout()
-    clearIpCache() // 登出时清除 IP 缓存
+    // 只有在用户已登录的情况下才发送登出请求
+    if (userInfo.value) {
+      await useUserApi.logout()
+    }
+    clearIpCache()
     localStorage.removeItem('userId')
     userStore.$reset()
     router.push('/login')
