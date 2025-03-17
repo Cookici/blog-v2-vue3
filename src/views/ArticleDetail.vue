@@ -856,11 +856,18 @@ onMounted(async () => {
   font-size: 16px;
   line-height: 1.8;
   color: #303133;
+  word-wrap: break-word;     
+  word-break: break-all;       
+  overflow-wrap: break-word;   
+  white-space: pre-wrap;      
 }
 
 .article-content :deep(p) {
   margin: 16px 0;
   line-height: 1.8;
+  word-wrap: break-word; 
+  word-break: break-all; 
+  overflow-wrap: break-word; 
 }
 
 .article-content :deep(img) {

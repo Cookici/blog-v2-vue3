@@ -42,7 +42,11 @@ export const useFriendApi = {
   // 更新好友申请
   updateFriendApply(data: FriendApplyUpdateReq) {
     return http.post('/friend-apply/update', data);
-  }
+  },
 
+  // 获取好友申请数量
+  getFriendApplyCount(userId: string) {
+    return http.get<number>('/friend-apply/count', { params: { userId } });
+  }
 }
 

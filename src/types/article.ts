@@ -24,9 +24,7 @@ export interface ArticleDTO {
 export interface ArticlePageQuery {
   page: number
   pageSize: number
-  articleTitle?: string
-  articleContent?: string
-  labelNameList?: string[]
+  elemnt?: string
 }
 
 // 分页查询参数
@@ -34,9 +32,7 @@ export interface ArticleLikePageQuery {
   userId: string
   page: number
   pageSize: number
-  articleTitle?: string
-  articleContent?: string
-  labelNameList?: string[]
+  element: string
 }
 
 // 分页查询参数
@@ -44,9 +40,7 @@ export interface ArticleUserPageQuery {
   userId: string
   page: number
   pageSize: number
-  articleTitle?: string
-  articleContent?: string
-  labelNameList?: string[]
+  element: string
 }
 
 
@@ -71,10 +65,9 @@ export interface UserArticleDataDTO {
 }
 
 export interface ArticleRecommendQuery{
-  userId :string,
-  page: number,
-  pageSize: number,
-  articleTitle?: string,
-  articleContent?: string,
-  labelNameList?: string[]
+  userId :string
+}
+
+export interface ArticleHotQuery{
+  userId :string
 }

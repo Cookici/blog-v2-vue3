@@ -98,6 +98,7 @@ import {
   Message
 } from '@element-plus/icons-vue'
 import { useArticleApi } from '@/services/modules/article'
+import { useFriendApi } from '@/services/modules/friend'
 import type { ArticleDTO, UserArticleDataDTO, ArticleUserPageQuery } from '@/types/article'
 import { ElMessage } from 'element-plus'
 import dayjs from 'dayjs'
@@ -126,9 +127,7 @@ const loadRecentArticles = async () => {
       userId: userInfo.value.userId,
       page: 1,
       pageSize: 5,
-      articleTitle: undefined,
-      articleContent: undefined,
-      labelNameList: undefined
+      element: ''
     } as ArticleUserPageQuery)
     recentArticles.value = data
   } catch (error: any) {
@@ -142,8 +141,17 @@ const loadStatsData = async () => {
   if (!userInfo.value?.userId) return
   
   try {
-    const data = await useArticleApi.userArticleData()
-    statsData.value = data
+    // 获取文章相关统计数据
+    const articleData = await useArticleApi.userArticleData()
+    
+    // 获取好友申请数量
+    const friendApplyCount = await useFriendApi.getFriendApplyCount(userInfo.value.userId)
+    
+    // 合并数据
+    statsData.value = {
+      ...articleData,
+      friendApplyCount: friendApplyCount
+    }
   } catch (error: any) {
     ElMessage.error(error.message || '获取统计数据失败')
   }

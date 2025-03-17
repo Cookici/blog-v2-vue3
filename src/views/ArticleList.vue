@@ -3,38 +3,17 @@
     <AppHeader />
     <el-container class="main-container">
       <el-main>
-        <div class="search-container">
+        <div class="search-container" v-if="isSearchableTab">
           <el-form :model="searchForm" class="search-form">
             <div class="search-inputs">
               <el-form-item>
-                <el-input v-model="searchForm.articleTitle" placeholder="搜索文章标题" clearable @clear="handleSearch">
+                <el-input v-model="searchForm.element" placeholder="搜索文章" clearable @clear="handleSearch">
                   <template #prefix>
                     <el-icon>
                       <Search />
                     </el-icon>
                   </template>
                 </el-input>
-              </el-form-item>
-              <el-form-item>
-                <el-input v-model="searchForm.articleContent" placeholder="搜索文章内容" clearable @clear="handleSearch">
-                  <template #prefix>
-                    <el-icon>
-                      <Document />
-                    </el-icon>
-                  </template>
-                </el-input>
-              </el-form-item>
-              <el-form-item>
-                <el-select v-model="searchForm.labelNameList" multiple filterable clearable placeholder="选择标签筛选"
-                  @clear="handleSearch">
-                  <template #prefix>
-                    <el-icon>
-                      <Collection />
-                    </el-icon>
-                  </template>
-                  <el-option v-for="label in labelOptions" :key="label.labelId" :label="label.labelName"
-                    :value="label.labelName" />
-                </el-select>
               </el-form-item>
             </div>
             <el-form-item class="search-button">
@@ -48,126 +27,63 @@
         </div>
 
         <div class="article-tabs">
-          <el-tabs v-model="activeTab" @tab-change="handleTabChange">
-            <el-tab-pane label="最新文章" name="latest">
-              <div class="articles-grid" v-loading="loading">
-                <el-card v-for="article in articles" :key="article.articleId" class="article-card">
-                  <div class="article-header">
-                    <div class="author-info">
-                      <el-avatar :size="32" :src="article.userInfo.userPhoto" />
-                      <span class="author-name">{{ article.userInfo.userName }}</span>
-                    </div>
-                  </div>
-                  <div class="article-content" @click="viewArticle(article)">
-                    <h3 class="article-title">{{ article.articleTitle }}</h3>
-                    <p class="article-preview" v-html="getPreviewContent(article.articleContent)"></p>
-                  </div>
-                  <div class="article-footer">
-                    <div class="article-labels">
-                      <el-tag v-for="label in article.labels" :key="label.labelId" size="small" class="label-tag">
-                        {{ label.labelName }}
-                      </el-tag>
-                    </div>
-                    <div class="article-meta">
-                      <div class="meta-item">
-                        <el-icon>
-                          <View />
-                        </el-icon>
-                        {{ article.viewCount || 0 }}
-                      </div>
-                      <div class="meta-item">
-                        <el-icon>
-                          <Star />
-                        </el-icon>
-                        {{ article.likeCount || 0 }}
-                      </div>
-                      <span class="create-time">{{ formatDate(article.createTime) }}</span>
-                    </div>
-                  </div>
-                </el-card>
+          <div class="tabs-header">
+            <el-tabs v-model="activeTab" @tab-change="handleTabChange">
+              <el-tab-pane label="最新文章" name="latest"></el-tab-pane>
+              <el-tab-pane label="我的喜欢" name="like"></el-tab-pane>
+              <el-tab-pane label="推荐文章" name="recommended"></el-tab-pane>
+              <el-tab-pane label="热门文章" name="hot"></el-tab-pane>
+            </el-tabs>
+            <div class="tabs-actions" v-if="activeTab === 'hot'">
+              <el-button type="primary" size="small" @click="refreshCurrentTab" :loading="refreshing">
+                <el-icon><Refresh /></el-icon> 刷新
+              </el-button>
+            </div>
+          </div>
+          
+          <!-- 文章内容区域 -->
+          <div class="articles-grid" v-loading="loading">
+            <el-card v-for="article in articles" :key="article.articleId" class="article-card">
+              <!-- 文章卡片内容 -->
+              <div class="article-header">
+                <div class="author-info">
+                  <el-avatar :size="32" :src="article.userInfo.userPhoto" />
+                  <span class="author-name">{{ article.userInfo.userName }}</span>
+                </div>
               </div>
-            </el-tab-pane>
-
-            <el-tab-pane label="热门文章" name="hot">
-              <div class="articles-grid" v-loading="loading">
-                <el-card v-for="article in articles" :key="article.articleId" class="article-card">
-                  <div class="article-header">
-                    <div class="author-info">
-                      <el-avatar :size="32" :src="article.userInfo.userPhoto" />
-                      <span class="author-name">{{ article.userInfo.userName }}</span>
-                    </div>
-                  </div>
-                  <div class="article-content" @click="viewArticle(article)">
-                    <h3 class="article-title">{{ article.articleTitle }}</h3>
-                    <p class="article-preview" v-html="getPreviewContent(article.articleContent)"></p>
-                  </div>
-                  <div class="article-footer">
-                    <div class="article-labels">
-                      <el-tag v-for="label in article.labels" :key="label.labelId" size="small" class="label-tag">
-                        {{ label.labelName }}
-                      </el-tag>
-                    </div>
-                    <div class="article-meta">
-                      <div class="meta-item">
-                        <el-icon>
-                          <View />
-                        </el-icon>
-                        {{ article.viewCount || 0 }}
-                      </div>
-                      <div class="meta-item">
-                        <el-icon>
-                          <Heart />
-                        </el-icon>
-                        {{ article.likeCount || 0 }}
-                      </div>
-                      <span class="create-time">{{ formatDate(article.createTime) }}</span>
-                    </div>
-                  </div>
-                </el-card>
+              <div class="article-content" @click="viewArticle(article)">
+                <h3 class="article-title">{{ article.articleTitle }}</h3>
+                <p class="article-preview" v-html="getPreviewContent(article.articleContent)"></p>
               </div>
-            </el-tab-pane>
-
-            <el-tab-pane label="推荐文章" name="recommended">
-              <div class="articles-grid" v-loading="loading">
-                <el-card v-for="article in articles" :key="article.articleId" class="article-card">
-                  <div class="article-header">
-                    <div class="author-info">
-                      <el-avatar :size="32" :src="article.userInfo.userPhoto" />
-                      <span class="author-name">{{ article.userInfo.userName }}</span>
-                    </div>
+              <div class="article-footer">
+                <div class="article-labels">
+                  <el-tag v-for="label in article.labels" :key="label.labelId" size="small" class="label-tag">
+                    {{ label.labelName }}
+                  </el-tag>
+                </div>
+                <div class="article-meta">
+                  <div class="meta-item">
+                    <el-icon>
+                      <View />
+                    </el-icon>
+                    {{ article.viewCount || 0 }}
                   </div>
-                  <div class="article-content" @click="viewArticle(article)">
-                    <h3 class="article-title">{{ article.articleTitle }}</h3>
-                    <p class="article-preview" v-html="getPreviewContent(article.articleContent)"></p>
+                  <div class="meta-item">
+                    <el-icon v-if="activeTab === 'latest' || activeTab === 'hot'">
+                      <Star />
+                    </el-icon>
+                    <el-icon v-else>
+                      <Heart />
+                    </el-icon>
+                    {{ article.likeCount || 0 }}
                   </div>
-                  <div class="article-footer">
-                    <div class="article-labels">
-                      <el-tag v-for="label in article.labels" :key="label.labelId" size="small" class="label-tag">
-                        {{ label.labelName }}
-                      </el-tag>
-                    </div>
-                    <div class="article-meta">
-                      <div class="meta-item">
-                        <el-icon>
-                          <View />
-                        </el-icon>
-                        {{ article.viewCount || 0 }}
-                      </div>
-                      <div class="meta-item">
-                        <el-icon>
-                          <Heart />
-                        </el-icon>
-                        {{ article.likeCount || 0 }}
-                      </div>
-                      <span class="create-time">{{ formatDate(article.createTime) }}</span>
-                    </div>
-                  </div>
-                </el-card>
+                  <span class="create-time">{{ formatDate(article.createTime) }}</span>
+                </div>
               </div>
-            </el-tab-pane>
-          </el-tabs>
+            </el-card>
+          </div>
 
-          <div class="pagination-container">
+          <div class="pagination-container" v-if="showPagination">
             <el-pagination v-model:current-page="currentPage" v-model:page-size="pageSize" :total="total"
               :page-sizes="[10, 20, 30, 50]" layout="total, sizes, prev, pager, next, jumper"
               @size-change="handleSizeChange" @current-change="handleCurrentChange" />
@@ -179,15 +95,19 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import AppHeader from '@/components/AppHeader.vue'
 import { useArticleApi } from '@/services/modules/article'
-import type { ArticleDTO } from '@/types/article'
+import type {
+  ArticleDTO,
+  ArticleLikePageQuery,
+  ArticleUserPageQuery,
+  ArticleRecommendQuery,
+  ArticleHotQuery
+} from '@/types/article'
 import { ElMessage } from 'element-plus'
-import { View, Star, Search, Document, Collection } from '@element-plus/icons-vue'
-import { useLabelApi } from '@/services/modules/label'
-import type { LabelDTO } from '@/types/article'
+import { View, Star, Search, Refresh } from '@element-plus/icons-vue'
 import { useUserStore } from '@/stores/user'
 import { storeToRefs } from 'pinia'
 
@@ -198,79 +118,114 @@ const router = useRouter()
 const activeTab = ref('latest')
 const articles = ref<ArticleDTO[]>([])
 const loading = ref(false)
+const refreshing = ref(false)
 const currentPage = ref(1)
 const pageSize = ref(10)
 const total = ref(0)
 
 const searchForm = ref({
-  articleTitle: '',
-  articleContent: '',
-  labelNameList: [] as string[]
+  element: ''
 })
 
-const labelOptions = ref<LabelDTO[]>([])
+// 计算属性：判断当前标签页是否需要显示分页
+const showPagination = computed(() => {
+  return ['latest', 'like'].includes(activeTab.value)
+})
 
-const loadLabelOptions = async () => {
-  try {
-    const labels = await useLabelApi.getKinds()
-    labelOptions.value = labels
-  } catch (error: any) {
-    ElMessage.error(error.message || '获取标签失败')
-  }
-}
+// 计算属性：判断当前标签页是否支持分页
+const isPaginatedTab = computed(() => {
+  return ['latest', 'like', 'recommended'].includes(activeTab.value)
+})
+
+// 计算属性：判断当前标签页是否支持搜索
+const isSearchableTab = computed(() => {
+  return ['latest', 'like'].includes(activeTab.value)
+})
 
 const handleSearch = () => {
   currentPage.value = 1
   loadArticles()
 }
 
+const loadLatestArticles = async (params: ArticleUserPageQuery) => {
+  const response = await useArticleApi.page(params)
+  return response
+}
+
+const loadLikedArticles = async (params: ArticleLikePageQuery) => {
+  const response = await useArticleApi.getLikePage(params)
+  return response
+}
+
+const loadRecommendedArticles = async (params: ArticleRecommendQuery) => {
+  const response = await useArticleApi.getUserRecommendArticles(params)
+  return response
+}
+
+const loadHotArticles = async (params: ArticleHotQuery) => {
+  const response = await useArticleApi.getHotPage(params)
+  return response
+}
+
+// 获取基础参数
+const getBaseParams = () => {
+  return {
+    userId: userInfo.value?.userId || '',
+    page: currentPage.value,
+    pageSize: pageSize.value,
+    element: searchForm.value.element
+  }
+}
+
+// 重构后的 loadArticles
 const loadArticles = async () => {
   try {
     loading.value = true
+    const baseParams = getBaseParams()
+
+    let response
     switch (activeTab.value) {
       case 'like':
-        const likeParams = {
-          userId: userInfo.value?.userId || '',
-          page: currentPage.value,
-          pageSize: pageSize.value,
-          articleTitle: searchForm.value.articleTitle,
-          articleContent: searchForm.value.articleContent,
-          labelNameList: searchForm.value.labelNameList.length > 0 ? searchForm.value.labelNameList : undefined
-        }
-        const likeResponse = await useArticleApi.getLikePage(likeParams)
-        articles.value = likeResponse.data
-        total.value = likeResponse.total
+        response = await loadLikedArticles(baseParams as ArticleLikePageQuery)
+        break
+      case 'hot':
+        response = await loadHotArticles({
+          userId: userInfo.value?.userId || ''
+        })
         break
       case 'recommended':
-        const recommendedParams = {
-          userId: userInfo.value?.userId || '',
-          page: currentPage.value,
-          pageSize: pageSize.value,
-          articleTitle: searchForm.value.articleTitle,
-          articleContent: searchForm.value.articleContent,
-          labelNameList: searchForm.value.labelNameList.length > 0 ? searchForm.value.labelNameList : undefined
-        }
-        const recommendedResponse = await useArticleApi.getUserRecommendArticles(recommendedParams)
-        articles.value = recommendedResponse.data
-        total.value = recommendedResponse.total
+        response = await loadRecommendedArticles({
+          userId: userInfo.value?.userId || ''
+        })
         break
       default:
-        const params = {
-          userId: userInfo.value?.userId || '',
-          page: currentPage.value,
-          pageSize: pageSize.value,
-          articleTitle: searchForm.value.articleTitle,
-          articleContent: searchForm.value.articleContent,
-          labelNameList: searchForm.value.labelNameList.length > 0 ? searchForm.value.labelNameList : undefined
-        }
-        const defaultResponse = await useArticleApi.page(params)
-        articles.value = defaultResponse.data
-        total.value = defaultResponse.total
+        response = await loadLatestArticles(baseParams)
+    }
+
+    articles.value = Array.isArray(response) ? response : response.data
+    
+    // 只有支持分页的标签页才更新总数
+    if (isPaginatedTab.value) {
+      total.value = Array.isArray(response) ? 0 : response.total
     }
   } catch (error: any) {
     ElMessage.error(error.message || '获取文章列表失败')
   } finally {
     loading.value = false
+    refreshing.value = false
+  }
+}
+
+// 刷新当前标签页数据
+const refreshCurrentTab = async () => {
+  try {
+    refreshing.value = true
+    await loadArticles()
+    ElMessage.success('刷新成功')
+  } catch (error: any) {
+    ElMessage.error(error.message || '刷新失败')
+  } finally {
+    refreshing.value = false
   }
 }
 
@@ -310,7 +265,6 @@ const getPreviewContent = (content: string) => {
 }
 
 onMounted(() => {
-  loadLabelOptions()
   loadArticles()
 })
 </script>
@@ -475,6 +429,12 @@ onMounted(() => {
   margin-bottom: 0;
 }
 
+.refresh-container {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 10px;
+}
+
 :deep(.el-input__wrapper) {
   box-shadow: 0 0 0 1px #dcdfe6 inset;
 }
@@ -485,6 +445,27 @@ onMounted(() => {
 
 :deep(.el-select) {
   width: 100%;
+}
+.tabs-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.tabs-header :deep(.el-tabs__header) {
+  margin-bottom: 0;
+}
+
+.tabs-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.search-container {
+  transition: all 0.3s ease;
+  max-height: 200px;
+  overflow: hidden;
 }
 
 @media (max-width: 768px) {

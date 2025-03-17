@@ -8,8 +8,8 @@
             <div class="search-inputs">
               <el-form-item>
                 <el-input
-                  v-model="searchForm.articleTitle"
-                  placeholder="搜索文章标题"
+                  v-model="searchForm.element"
+                  placeholder="搜索文章"
                   clearable
                   @clear="handleSearch"
                 >
@@ -17,38 +17,6 @@
                     <el-icon><Search /></el-icon>
                   </template>
                 </el-input>
-              </el-form-item>
-              <el-form-item>
-                <el-input
-                  v-model="searchForm.articleContent"
-                  placeholder="搜索文章内容"
-                  clearable
-                  @clear="handleSearch"
-                >
-                  <template #prefix>
-                    <el-icon><Document /></el-icon>
-                  </template>
-                </el-input>
-              </el-form-item>
-              <el-form-item>
-                <el-select
-                  v-model="searchForm.labelNameList"
-                  multiple
-                  filterable
-                  clearable
-                  placeholder="选择标签筛选"
-                  @clear="handleSearch"
-                >
-                  <template #prefix>
-                    <el-icon><Collection /></el-icon>
-                  </template>
-                  <el-option
-                    v-for="label in labelOptions"
-                    :key="label.labelId"
-                    :label="label.labelName"
-                    :value="label.labelName"
-                  />
-                </el-select>
               </el-form-item>
             </div>
             <el-form-item class="search-button">
@@ -129,9 +97,8 @@ import AppHeader from '@/components/AppHeader.vue'
 import { useArticleApi } from '@/services/modules/article'
 import type { ArticleDTO, ArticleUserPageQuery } from '@/types/article'
 import { ElMessage } from 'element-plus'
-import { View, Star, Search, Document, Collection } from '@element-plus/icons-vue'
-import { useLabelApi } from '@/services/modules/label'
-import type { LabelDTO } from '@/types/article'
+import { View, Star, Search } from '@element-plus/icons-vue'
+
 
 const router = useRouter()
 const articles = ref<ArticleDTO[]>([])
@@ -141,22 +108,8 @@ const pageSize = ref(10)
 const total = ref(0)
 
 const searchForm = ref({
-  articleTitle: '',
-  articleContent: '',
-  labelNameList: [] as string[]
+  element: ''
 })
-
-const labelOptions = ref<LabelDTO[]>([])
-
-// 加载标签选项
-const loadLabelOptions = async () => {
-  try {
-    const labels = await useLabelApi.getKinds()
-    labelOptions.value = labels
-  } catch (error: any) {
-    ElMessage.error(error.message || '获取标签失败')
-  }
-}
 
 // 搜索处理
 const handleSearch = () => {
@@ -172,9 +125,7 @@ const loadArticles = async () => {
       userId: localStorage.getItem('userId'),
       page: currentPage.value,
       pageSize: pageSize.value,
-      articleTitle: searchForm.value.articleTitle,
-      articleContent: searchForm.value.articleContent,
-      labelNameList: searchForm.value.labelNameList.length > 0 ? searchForm.value.labelNameList : undefined
+      element: searchForm.value.element
     } as ArticleUserPageQuery
 
     const { data, total: totalCount } = await useArticleApi.getUserArticles(params)
@@ -243,7 +194,6 @@ const getPreviewContent = (content: string) => {
 }
 
 onMounted(() => {
-  loadLabelOptions()
   loadArticles()
 })
 </script>
@@ -416,4 +366,4 @@ onMounted(() => {
     width: 100%;
   }
 }
-</style> 
+</style>
