@@ -9,34 +9,28 @@
               <h1 class="article-title">{{ article.articleTitle }}</h1>
               <div class="article-meta">
                 <div class="author-info">
-                  <el-avatar 
-                    :size="40" 
-                    :src="article.userInfo.userPhoto || '/default-avatar.png'"
-                  />
+                  <el-avatar :size="40" :src="article.userInfo.userPhoto || '/default-avatar.png'" />
                   <div class="author-details">
                     <span class="author-name">{{ article.userInfo.userName }}</span>
                     <span class="publish-time">{{ formatDate(article.createTime) }}</span>
                   </div>
                 </div>
                 <div class="meta-item">
-                  <el-icon><View /></el-icon>
+                  <el-icon>
+                    <View />
+                  </el-icon>
                   <span>{{ article.viewCount || 0 }}</span>
                 </div>
                 <div class="meta-item">
-                  <el-button 
-                    :icon="Star" 
-                    text
-                    @click="handleLike"
-                  >
+                  <el-button :icon="Star" text @click="handleLike">
                     {{ article.likeCount || 0 }}
                   </el-button>
                 </div>
               </div>
             </div>
-            
+
             <div class="article-main">
-              <div class="article-content markdown-body" 
-                   v-html="sanitizedContent">
+              <div class="article-content markdown-body" v-html="sanitizedContent">
               </div>
             </div>
 
@@ -44,65 +38,45 @@
               <el-button type="primary" @click="goBack">返回列表</el-button>
             </div>
           </div>
-          
+
           <div v-else-if="!loading" class="empty-state">
             <el-empty description="暂无文章内容" />
           </div>
 
           <div class="comments-section">
             <h3 class="comments-title">评论 ({{ total }})</h3>
-            
+
             <div class="comment-input-wrapper">
-              <el-input
-                v-model="commentContent"
-                type="textarea"
-                :rows="3"
-                placeholder="写下你的评论..."
-                :maxlength="500"
-                show-word-limit
-              />
+              <el-input v-model="commentContent" type="textarea" :rows="3" placeholder="写下你的评论..." :maxlength="500"
+                show-word-limit />
               <div class="comment-toolbar">
                 <div class="toolbar-left">
-                  <el-upload
-                    v-if="!commentImage"
-                    class="image-uploader"
-                    :action="uploadAction"
-                    :before-upload="beforeCommentImageUpload"
-                    :http-request="handleCommentImageUpload"
-                  >
+                  <el-upload v-if="!commentImage" class="image-uploader" :action="uploadAction"
+                    :before-upload="beforeCommentImageUpload" :http-request="handleCommentImageUpload">
                     <el-button class="upload-button" type="primary" plain>
-                      <el-icon><Picture /></el-icon>
+                      <el-icon>
+                        <Picture />
+                      </el-icon>
                       <span>添加图片</span>
                     </el-button>
                   </el-upload>
                 </div>
-                <div class="toolbar-right">
-                  <el-button 
-                    type="primary" 
-                    @click="submitComment" 
-                    :loading="submitting"
-                    class="submit-button"
-                  >
-                    发表评论
-                  </el-button>
-                </div>
+
               </div>
               <div v-if="commentImage" class="uploaded-image-wrapper">
                 <div class="uploaded-image">
-                  <el-image 
-                    :src="commentImage" 
-                    class="preview-image"
-                    :preview-src-list="[commentImage]"
-                  />
-                  <el-button
-                    type="danger"
-                    circle
-                    class="remove-image"
-                    @click="removeCommentImage"
-                  >
-                    <el-icon><Close /></el-icon>
+                  <el-image :src="commentImage" class="preview-image" :preview-src-list="[commentImage]" />
+                  <el-button type="danger" circle class="remove-image" @click="removeCommentImage">
+                    <el-icon>
+                      <Close />
+                    </el-icon>
                   </el-button>
                 </div>
+              </div>
+              <div class="submit-button-container">
+                <el-button type="primary" @click="submitComment" :loading="submitting" class="submit-button">
+                  发表评论
+                </el-button>
               </div>
             </div>
 
@@ -118,32 +92,22 @@
                       </div>
                       <p class="comment-text">{{ comment.commentContent }}</p>
                       <div v-if="comment.commentImg" class="comment-image-wrapper">
-                        <el-image 
-                          :src="comment.commentImg" 
-                          class="comment-image"
-                          :preview-src-list="[comment.commentImg]"
-                          fit="cover"
-                        />
+                        <el-image :src="comment.commentImg" class="comment-image"
+                          :preview-src-list="[comment.commentImg]" fit="cover" :initial-index="0" preview-teleported />
                       </div>
                       <div class="comment-footer">
                         <div class="comment-actions">
-                          <el-button 
-                            link 
-                            type="primary" 
-                            class="action-btn"
-                            @click="showReplyInput(comment)"
-                          >
-                            <el-icon><ChatLineRound /></el-icon>
+                          <el-button link type="primary" class="action-btn" @click="showReplyInput(comment)">
+                            <el-icon>
+                              <ChatLineRound />
+                            </el-icon>
                             回复
                           </el-button>
-                          <el-button 
-                            v-if="userStore.userInfo?.userId === comment.userId"
-                            link 
-                            type="danger" 
-                            class="action-btn"
-                            @click="deleteComment(comment)"
-                          >
-                            <el-icon><Delete /></el-icon>
+                          <el-button v-if="userStore.userInfo?.userId === comment.userId" link type="danger"
+                            class="action-btn" @click="deleteComment(comment)">
+                            <el-icon>
+                              <Delete />
+                            </el-icon>
                             删除
                           </el-button>
                         </div>
@@ -152,16 +116,16 @@
                   </div>
 
                   <div class="replies-list" v-if="comment.commentList && comment.commentList.length > 0">
-                    <div v-for="(reply, index) in comment.commentList" 
-                         :key="reply.commentId" 
-                         class="reply-item"
-                         v-show="expandedComments.has(comment.commentId) || index < 2">
+                    <div v-for="(reply, index) in comment.commentList" :key="reply.commentId" class="reply-item"
+                      v-show="expandedComments.has(comment.commentId) || index < 2">
                       <div class="reply-users">
                         <div class="reply-user from">
                           <el-avatar :size="32" :src="reply.userInfo.userPhoto" />
                           <span class="username">{{ reply.userInfo.userName }}</span>
                         </div>
-                        <el-icon class="reply-arrow"><ArrowRight /></el-icon>
+                        <el-icon class="reply-arrow">
+                          <ArrowRight />
+                        </el-icon>
                         <div class="reply-user to" v-if="reply.toUserInfo">
                           <el-avatar :size="32" :src="reply.toUserInfo.userPhoto" />
                           <span class="username">{{ reply.toUserInfo.userName }}</span>
@@ -169,28 +133,16 @@
                       </div>
                       <div class="reply-content">
                         <p class="reply-text">{{ reply.commentContent }}</p>
-                        <el-image 
-                          v-if="reply.commentImg" 
-                          :src="reply.commentImg" 
-                          class="reply-image"
-                          :preview-src-list="[reply.commentImg]"
-                        />
+                        <el-image v-if="reply.commentImg" :src="reply.commentImg" class="reply-image"
+                          :preview-src-list="[reply.commentImg]" />
                         <div class="reply-footer">
                           <span class="time">{{ formatDate(reply.createTime) }}</span>
                           <div class="reply-actions">
-                            <el-button 
-                              link 
-                              type="primary" 
-                              @click="showReplyInput(comment, reply)"
-                            >
+                            <el-button link type="primary" @click="showReplyInput(comment, reply)">
                               回复
                             </el-button>
-                            <el-button 
-                              v-if="userStore.userInfo?.userId === reply.userId"
-                              link 
-                              type="danger" 
-                              @click="deleteComment(reply)"
-                            >
+                            <el-button v-if="userStore.userInfo?.userId === reply.userId" link type="danger"
+                              @click="deleteComment(reply)">
                               删除
                             </el-button>
                           </div>
@@ -199,62 +151,41 @@
                     </div>
 
                     <div class="expand-replies" v-if="(childCommentTotals.get(comment.commentId) || 0) > 2">
-                      <el-button 
-                        link 
-                        type="primary" 
-                        @click="toggleChildComments(comment.commentId)"
-                      >
-                        {{ expandedComments.has(comment.commentId) ? '收起' : `查看全部 ${childCommentTotals.get(comment.commentId)} 条回复` }}
+                      <el-button link type="primary" @click="toggleChildComments(comment.commentId)">
+                        {{ expandedComments.has(comment.commentId) ? '收起' : `查看全部
+                        ${childCommentTotals.get(comment.commentId)} 条回复` }}
                       </el-button>
                     </div>
 
                     <div class="child-pagination" v-if="expandedComments.has(comment.commentId)">
-                      <el-pagination
-                        :current-page="getChildCurrentPage(comment.commentId)"
-                        :page-size="getChildPageSize(comment.commentId)"
-                        :total="getChildTotal(comment.commentId)"
-                        :page-sizes="[5, 10, 20]"
-                        layout="sizes, prev, pager, next"
+                      <el-pagination :current-page="getChildCurrentPage(comment.commentId)"
+                        :page-size="getChildPageSize(comment.commentId)" :total="getChildTotal(comment.commentId)"
+                        :page-sizes="[5, 10, 20]" layout="sizes, prev, pager, next"
                         @update:current-page="(page: number) => setChildCurrentPage(comment.commentId, page)"
-                        @update:page-size="(size: number) => setChildPageSize(comment.commentId, size)"
-                      />
+                        @update:page-size="(size: number) => setChildPageSize(comment.commentId, size)" />
                     </div>
                   </div>
 
                   <div v-if="replyTo?.commentId === comment.commentId" class="reply-input-wrapper">
-                    <el-input
-                      v-model="replyContent"
-                      type="textarea"
-                      :rows="2"
-                      :placeholder="replyTo.toUser ? `回复 ${replyTo.toUser.userName}` : '写下你的回复...'"
-                    />
+                    <el-input v-model="replyContent" type="textarea" :rows="2"
+                      :placeholder="replyTo.toUser ? `回复 ${replyTo.toUser.userName}` : '写下你的回复...'" />
                     <div v-if="replyImage" class="uploaded-image">
-                      <el-image 
-                        :src="replyImage" 
-                        class="preview-image"
-                        :preview-src-list="[replyImage]"
-                      />
-                      <el-button
-                        type="danger"
-                        circle
-                        class="remove-image"
-                        @click="removeReplyImage"
-                      >
-                        <el-icon><Close /></el-icon>
+                      <el-image :src="replyImage" class="preview-image" :preview-src-list="[replyImage]" />
+                      <el-button type="danger" circle class="remove-image" @click="removeReplyImage">
+                        <el-icon>
+                          <Close />
+                        </el-icon>
                       </el-button>
                     </div>
                     <div class="reply-toolbar">
                       <div class="toolbar-left">
-                        <el-upload
-                          v-if="!replyImage"
-                          class="image-uploader"
-                          :action="uploadAction"
-                          :before-upload="beforeReplyImageUpload"
-                          :http-request="handleReplyImageUpload"
-                        >
-                          <el-button type="primary" link>
-                            <el-icon><Picture /></el-icon>
-                            添加图片
+                        <el-upload v-if="!replyImage" class="image-uploader" :action="uploadAction"
+                          :before-upload="beforeReplyImageUpload" :http-request="handleReplyImageUpload">
+                          <el-button class="upload-reply-button" type="primary" plain>
+                            <el-icon>
+                              <Picture />
+                            </el-icon>
+                            <span>添加图片</span>
                           </el-button>
                         </el-upload>
                       </div>
@@ -272,15 +203,9 @@
             </div>
 
             <div class="pagination-wrapper" v-if="total > 0">
-              <el-pagination
-                v-model:current-page="currentPage"
-                v-model:page-size="pageSize"
-                :total="total"
-                :page-sizes="[10, 20, 30, 50]"
-                layout="total, sizes, prev, pager, next"
-                @size-change="handleSizeChange"
-                @current-change="handleCurrentChange"
-              />
+              <el-pagination v-model:current-page="currentPage" v-model:page-size="pageSize" :total="total"
+                :page-sizes="[10, 20, 30, 50]" layout="total, sizes, prev, pager, next" @size-change="handleSizeChange"
+                @current-change="handleCurrentChange" />
             </div>
           </div>
         </div>
@@ -357,7 +282,7 @@ const loadArticle = async () => {
     loading.value = true
     const articleDTO = await useArticleApi.getArticleById(articleId)
     article.value = articleDTO
-    
+
     // 增加浏览量
     if (userStore.userInfo) {
       await useArticleApi.incrementView(articleId)
@@ -390,7 +315,7 @@ const goBack = () => {
 // 处理点赞
 const handleLike = async () => {
   if (!article.value) return
-  
+
   try {
     if (userStore.userInfo) {
       await useArticleApi.incrementLike(article.value.articleId)
@@ -408,7 +333,7 @@ const handleLike = async () => {
 // 加载评论列表
 const loadComments = async () => {
   if (!article.value?.articleId) return
-  
+
   try {
     loadingComments.value = true
     // 获取主评论
@@ -436,7 +361,7 @@ const loadComments = async () => {
             page: 1,
             pageSize: 2  // 默认只加载2条子评论
           })
-          
+
           if (childResponse) {
             // 保存子评论总数
             childCommentTotals.value.set(comment.commentId, childResponse.total)
@@ -581,7 +506,7 @@ const loadChildComments = async (commentId: string) => {
     if (!response) return
 
     const { data = [], total = 0 } = response
-    
+
     // 更新评论列表中的子评论
     comments.value = comments.value.map(comment => {
       if (comment.commentId === commentId) {
@@ -618,7 +543,7 @@ const submitComment = async () => {
     ElMessage.warning('请先登录')
     return
   }
-  
+
   if (!commentContent.value.trim()) {
     ElMessage.warning('请输入评论内容')
     return
@@ -647,7 +572,7 @@ const submitComment = async () => {
 // 修改提交回复的方法
 const submitReply = async () => {
   if (!userStore.userInfo || !replyTo.value) return
-  
+
   if (!replyContent.value.trim()) {
     ElMessage.warning('请输入回复内容')
     return
@@ -748,7 +673,8 @@ onMounted(async () => {
 .app-container {
   min-height: 100vh;
   background-color: #f5f7fa;
-  padding-top: 60px; /* 为固定的 header 留出空间 */
+  padding-top: 60px;
+  /* 为固定的 header 留出空间 */
 }
 
 .main-container {
@@ -761,7 +687,8 @@ onMounted(async () => {
   background: white;
   border-radius: 8px;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
-  min-height: calc(100vh - 140px); /* 减去头部和padding的高度 */
+  min-height: calc(100vh - 140px);
+  /* 减去头部和padding的高度 */
 }
 
 .article-content-wrapper {
@@ -856,18 +783,18 @@ onMounted(async () => {
   font-size: 16px;
   line-height: 1.8;
   color: #303133;
-  word-wrap: break-word;     
-  word-break: break-all;       
-  overflow-wrap: break-word;   
-  white-space: pre-wrap;      
+  word-wrap: break-word;
+  word-break: break-all;
+  overflow-wrap: break-word;
+  white-space: pre-wrap;
 }
 
 .article-content :deep(p) {
   margin: 16px 0;
   line-height: 1.8;
-  word-wrap: break-word; 
-  word-break: break-all; 
-  overflow-wrap: break-word; 
+  word-wrap: break-word;
+  word-break: break-all;
+  overflow-wrap: break-word;
 }
 
 .article-content :deep(img) {
@@ -940,11 +867,6 @@ onMounted(async () => {
   align-items: center;
 }
 
-.toolbar-right {
-  display: flex;
-  align-items: center;
-}
-
 .upload-button {
   display: flex;
   align-items: center;
@@ -958,6 +880,18 @@ onMounted(async () => {
 
 .upload-button:hover {
   opacity: 0.9;
+}
+
+.submit-button-container {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 12px;
+}
+
+.submit-button {
+  height: 36px;
+  padding: 0 24px;
+  font-size: 14px;
 }
 
 .submit-button {
@@ -992,6 +926,21 @@ onMounted(async () => {
   background-color: rgba(255, 255, 255, 0.9);
   border: 1px solid #ddd;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.remove-image :deep(.el-icon) {
+  color: var(--el-color-danger);
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.remove-image:hover {
+  background-color: var(--el-color-danger);
+  border-color: var(--el-color-danger);
+}
+
+.remove-image:hover :deep(.el-icon) {
+  color: white;
 }
 
 .comments-list {
@@ -1074,7 +1023,8 @@ onMounted(async () => {
 .comment-actions {
   display: flex;
   align-items: center;
-  justify-content: flex-end;  /* 将按钮靠右对齐 */
+  justify-content: flex-end;
+  /* 将按钮靠右对齐 */
   gap: 16px;
 }
 
@@ -1084,12 +1034,14 @@ onMounted(async () => {
   gap: 4px;
   padding: 4px 8px;
   font-size: 13px;
-  height: 32px;  /* 固定按钮高度 */
+  height: 32px;
+  /* 固定按钮高度 */
 }
 
 .action-btn .el-icon {
   font-size: 14px;
-  margin-right: 2px;  /* 图标和文字之间的间距 */
+  margin-right: 2px;
+  /* 图标和文字之间的间距 */
 }
 
 /* 回复按钮样式 */
@@ -1108,14 +1060,16 @@ onMounted(async () => {
 .reply-actions {
   display: flex;
   align-items: center;
-  justify-content: flex-end;  /* 子评论按钮也靠右对齐 */
+  justify-content: flex-end;
+  /* 子评论按钮也靠右对齐 */
   gap: 16px;
   margin-top: 8px;
 }
 
 .reply-actions .el-button {
   font-size: 13px;
-  height: 28px;  /* 子评论按钮稍小一些 */
+  height: 28px;
+  /* 子评论按钮稍小一些 */
 }
 
 .replies-list {
@@ -1128,14 +1082,19 @@ onMounted(async () => {
 
 .reply-item {
   padding: 16px;
-  margin-bottom: 12px;  /* 添加底部间距 */
-  background-color: #fff;  /* 白色背景 */
-  border-radius: 8px;     /* 圆角 */
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);  /* 轻微阴影 */
+  margin-bottom: 12px;
+  /* 添加底部间距 */
+  background-color: #fff;
+  /* 白色背景 */
+  border-radius: 8px;
+  /* 圆角 */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  /* 轻微阴影 */
 }
 
 .reply-item:last-child {
-  margin-bottom: 0;  /* 最后一个评论不需要底部间距 */
+  margin-bottom: 0;
+  /* 最后一个评论不需要底部间距 */
 }
 
 .reply-users {
@@ -1143,8 +1102,10 @@ onMounted(async () => {
   align-items: center;
   gap: 8px;
   margin-bottom: 12px;
-  padding-bottom: 12px;  /* 添加内边距 */
-  border-bottom: 1px solid #f0f0f0;  /* 添加分隔线 */
+  padding-bottom: 12px;
+  /* 添加内边距 */
+  border-bottom: 1px solid #f0f0f0;
+  /* 添加分隔线 */
 }
 
 .reply-user {
@@ -1152,7 +1113,8 @@ onMounted(async () => {
   align-items: center;
   gap: 8px;
   padding: 4px 12px;
-  background-color: #f8f9fa;  /* 浅灰色背景 */
+  background-color: #f8f9fa;
+  /* 浅灰色背景 */
   border-radius: 20px;
   transition: all 0.3s ease;
 }
@@ -1171,7 +1133,8 @@ onMounted(async () => {
 }
 
 .reply-content {
-  padding: 0 12px;  /* 修改内边距 */
+  padding: 0 12px;
+  /* 修改内边距 */
 }
 
 .reply-text {
@@ -1196,10 +1159,37 @@ onMounted(async () => {
   color: #909399;
 }
 
+.reply-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 12px 0;
+  padding: 12px 0;
+  border-top: 1px solid #f0f0f0;
+}
+
+.upload-reply-button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 36px;
+  padding: 0 16px;
+  font-size: 14px;
+  border-radius: 4px;
+  transition: all 0.3s;
+  background-color: #f0f7ff;
+}
+
+.upload-reply-button:hover {
+  background-color: #e0f0ff;
+  opacity: 0.9;
+}
+
 .reply-actions {
   display: flex;
   align-items: center;
   gap: 12px;
+  margin-top: 12px;
 }
 
 .expand-replies {
@@ -1207,11 +1197,17 @@ onMounted(async () => {
   text-align: center;
 }
 
+.pagination-wrapper {
+  margin-top: 24px;
+  display: flex;
+  justify-content: center;
+}
+
 .child-pagination {
   margin-top: 16px;
-  padding-left: 48px;
   display: flex;
-  justify-content: flex-end;
+  justify-content: center;
+  padding-left: 0;
 }
 
 /* 移动端适配 */
@@ -1255,4 +1251,4 @@ onMounted(async () => {
     margin-bottom: 8px;
   }
 }
-</style> 
+</style>

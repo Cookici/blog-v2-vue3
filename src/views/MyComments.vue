@@ -64,8 +64,11 @@
                         :src="row.commentImg" 
                         class="comment-image"
                         :preview-src-list="[row.commentImg]"
+                        :initial-index="0"
+                        preview-teleported
+                        fit="cover"
                       />
-                    </div>
+                    </div>  
                   </div>
                 </div>
               </template>

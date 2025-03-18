@@ -49,7 +49,7 @@
                       :outputType="'png'"
                       :info="true"
                       :full="true"
-                      :canMove="false"
+                      :canMove="true"
                       :canMoveBox="true"
                       :original="false"
                       :autoCrop="true"
@@ -63,7 +63,14 @@
                   <template #footer>
                     <span class="dialog-footer">
                       <el-button @click="cropperVisible = false">取消</el-button>
-                      <el-button type="primary" @click="handleCropUpload">确认</el-button>
+                      <el-button 
+                        type="primary" 
+                        :loading="uploading" 
+                        :disabled="uploading"
+                        @click="handleCropUpload"
+                      >
+                        {{ uploading ? '上传中...' : '确认' }}
+                      </el-button>
                     </span>
                   </template>
                 </el-dialog>
@@ -93,10 +100,11 @@
               <el-form-item label="生日" prop="userBirthday">
                 <el-date-picker
                   v-model="profileForm.userBirthday"
-                  type="datetime"
+                  type="date"
                   style="width: 100%"
-                  value-format="YYYY-MM-DDTHH:mm:ss"
-                  format="YYYY-MM-DD HH:mm:ss"
+                  value-format="YYYY-MM-DD HH:mm:ss"
+                  format="YYYY-MM-DD"
+                  :default-time="new Date(2000, 0, 1, 0, 0, 0)"
                   placeholder="请选择生日"
                 />
               </el-form-item>
@@ -104,10 +112,11 @@
               <el-form-item>
                 <el-button 
                   type="primary" 
-                  :loading="loading" 
+                  :loading="loading"
+                  :disabled="loading"
                   @click="handleUpdateProfile"
                 >
-                  保存修改
+                  {{ loading ? '保存中...' : '保存修改' }}
                 </el-button>
               </el-form-item>
             </el-form>
@@ -119,6 +128,7 @@
 </template>
 
 <script setup lang="ts">
+import { useRouter } from 'vue-router';
 import { ref, onMounted, computed } from 'vue'
 import { useUserStore } from '@/stores/user'
 import { storeToRefs } from 'pinia'
@@ -130,6 +140,7 @@ import dayjs from 'dayjs';
 import 'vue-cropper/dist/index.css'
 import { VueCropper } from 'vue-cropper'
 
+const router = useRouter();
 const userStore = useUserStore()
 const { userInfo } = storeToRefs(userStore)
 const loading = ref(false)
@@ -175,6 +186,7 @@ onMounted(() => {
 const cropperVisible = ref(false)
 const cropperImage = ref('')
 const cropperRef = ref()
+const uploading = ref(false)
 
 // 处理头像选择
 const handleAvatarChange = (file: any) => {
@@ -206,36 +218,42 @@ const handleCropUpload = async () => {
   if (!cropperRef.value) return
   
   try {
-    // 获取裁剪后的 blob 数据
-    cropperRef.value.getCropBlob(async (blob: Blob) => {
-      if (!blob) {
-        ElMessage.error('裁剪失败')
-        return
-      }
-
-      // 创建 FormData，使用 imageFile 作为字段名
-      const formData = new FormData()
-      formData.append('imageFile', blob, 'avatar.png')  // 修改这里，key 改为 imageFile
-
-      // 调用上传接口
-      const data = await useUserApi.uploadAvatar(formData)
-
-      // 更新头像
-      profileForm.value.userPhoto = data.fileUrl
-      if (userInfo.value) {
-        userStore.$patch({
-          userInfo: {
-            ...userInfo.value,
-            userPhoto: data.fileUrl
+    uploading.value = true
+    await new Promise((resolve, reject) => {
+      cropperRef.value.getCropBlob(async (blob: Blob) => {
+        try {
+          if (!blob) {
+            reject(new Error('裁剪失败'))
+            return
           }
-        })
-      }
-      
-      ElMessage.success('头像上传成功')
-      cropperVisible.value = false
+
+          const formData = new FormData()
+          formData.append('imageFile', blob, 'avatar.png')
+
+          const data = await useUserApi.uploadAvatar(formData)
+
+          profileForm.value.userPhoto = data.fileUrl
+          if (userInfo.value) {
+            userStore.$patch({
+              userInfo: {
+                ...userInfo.value,
+                userPhoto: data.fileUrl
+              }
+            })
+          }
+          
+          ElMessage.success('头像上传成功')
+          cropperVisible.value = false
+          resolve(true)
+        } catch (error) {
+          reject(error)
+        }
+      })
     })
   } catch (error: any) {
     ElMessage.error(error.message || '头像上传失败')
+  } finally {
+    uploading.value = false
   }
 }
 
@@ -247,25 +265,59 @@ const handleUpdateProfile = async () => {
     if (valid) {
       try {
         loading.value = true
-        await useUserApi.updateProfile({
-          userId: profileForm.value.userId,
-          userName: profileForm.value.userName,
-          userSex: profileForm.value.userSex,
-          userBirthday: profileForm.value.userBirthday
-        })
         
-        // 更新成功后，直接用表单的值更新 store
-        if (userInfo.value) {
-          userStore.$patch({
-            userInfo: {
-              ...userInfo.value,
-              userName: profileForm.value.userName,
-              userSex: profileForm.value.userSex,
-              userBirthday: profileForm.value.userBirthday
-            }
-          })
+        const updateData: any = { userId: profileForm.value.userId }
+        const isUserNameChanged = userInfo.value && 
+          profileForm.value.userName !== userInfo.value.userName
+        
+        if (isUserNameChanged) {
+          updateData.userName = profileForm.value.userName
         }
-        ElMessage.success('个人信息更新成功')
+        
+        if (userInfo.value && profileForm.value.userSex !== userInfo.value.userSex) {
+          updateData.userSex = profileForm.value.userSex
+        }
+        
+        if (userInfo.value && 
+            dayjs(profileForm.value.userBirthday).format('YYYY-MM-DD HH:mm:ss') !== 
+            dayjs(userInfo.value.userBirthday).format('YYYY-MM-DD HH:mm:ss')) {
+          updateData.userBirthday = profileForm.value.userBirthday
+        }
+        
+        if (Object.keys(updateData).length <= 1) {
+          ElMessage.info('没有信息需要更新')
+          loading.value = false
+          return
+        }
+        await useUserApi.updateProfile(updateData)
+        if (isUserNameChanged) {
+          ElMessage.success('用户名已更新，需要重新登录')
+          setTimeout(async () => {
+            try {
+              if (userInfo.value?.userIp) {
+                localStorage.removeItem(`ip_location_${userInfo.value.userIp}`)
+              }
+              await useUserApi.logout()
+              localStorage.removeItem('userId')
+              userStore.$reset()
+              router.push('/login')
+            } catch (error: any) {
+              console.error('登出失败:', error)
+            }
+          }, 1500)
+        } else {
+          if (userInfo.value) {
+            userStore.$patch({
+              userInfo: {
+                ...userInfo.value,
+                userName: profileForm.value.userName,
+                userSex: profileForm.value.userSex,
+                userBirthday: profileForm.value.userBirthday
+              }
+            })
+          }
+          ElMessage.success('个人信息更新成功')
+        }
       } catch (error: any) {
         ElMessage.error(error.message || '更新失败')
       } finally {
@@ -353,4 +405,4 @@ const handleUpdateProfile = async () => {
     margin-bottom: 18px;
   }
 }
-</style> 
+</style>

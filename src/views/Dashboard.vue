@@ -137,24 +137,31 @@ const loadRecentArticles = async () => {
   }
 }
 
-const loadStatsData = async () => {
+const loadStatsData = () => {
   if (!userInfo.value?.userId) return
-  
-  try {
-    // 获取文章相关统计数据
-    const articleData = await useArticleApi.userArticleData()
-    
-    // 获取好友申请数量
-    const friendApplyCount = await useFriendApi.getFriendApplyCount(userInfo.value.userId)
-    
-    // 合并数据
-    statsData.value = {
-      ...articleData,
-      friendApplyCount: friendApplyCount
-    }
-  } catch (error: any) {
-    ElMessage.error(error.message || '获取统计数据失败')
-  }
+
+  const loadArticleStats = () => 
+    useArticleApi.userArticleData()
+      .then(data => {
+        statsData.value = {
+          ...statsData.value,
+          ...data
+        }
+      })
+      .catch(() => ElMessage.error('获取文章统计数据失败'))
+
+  const loadFriendStats = () => 
+    useFriendApi.getFriendApplyCount(userInfo.value!.userId)
+      .then(count => {
+        statsData.value.friendApplyCount = count
+      })
+      .catch(() => ElMessage.error('获取好友申请数量失败'))
+
+  // 并行执行两个独立的数据加载
+  Promise.allSettled([
+    loadArticleStats(),
+    loadFriendStats()
+  ])
 }
 
 // 修改 statsCards 的计算方式
