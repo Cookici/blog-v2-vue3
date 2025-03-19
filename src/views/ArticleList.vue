@@ -4,10 +4,15 @@
     <el-container class="main-container">
       <el-main>
         <div class="search-container" v-if="isSearchableTab">
-          <el-form :model="searchForm" class="search-form">
+          <el-form :model="searchForm" class="search-form" @submit.prevent>
             <div class="search-inputs">
               <el-form-item>
-                <el-input v-model="searchForm.element" placeholder="搜索文章" clearable @clear="handleSearch">
+                <el-input 
+                  v-model="searchForm.element" 
+                  placeholder="搜索文章" 
+                  clearable 
+                  @clear="handleSearch"
+                  @keyup.enter="handleSearch">
                   <template #prefix>
                     <el-icon>
                       <Search />
