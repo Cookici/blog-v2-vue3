@@ -82,7 +82,7 @@
 
             <div class="comments-list" v-loading="loadingComments">
               <template v-if="comments.length > 0">
-                <div v-for="comment in comments" :key="comment.commentId" class="comment-item">
+                <div v-for="comment in comments" :key="comment.commentId" class="comment-item" :data-comment-id="comment.commentId">
                   <div class="comment-main">
                     <el-avatar :size="40" :src="comment.userInfo.userPhoto" />
                     <div class="comment-content">
@@ -160,17 +160,18 @@
                     <div class="child-pagination" v-if="expandedComments.has(comment.commentId)">
                       <el-pagination :current-page="getChildCurrentPage(comment.commentId)"
                         :page-size="getChildPageSize(comment.commentId)" :total="getChildTotal(comment.commentId)"
-                        :page-sizes="[5, 10, 20]" layout="sizes, prev, pager, next"
+                        :page-sizes="[5]" layout="sizes, prev, pager, next"
                         @update:current-page="(page: number) => setChildCurrentPage(comment.commentId, page)"
                         @update:page-size="(size: number) => setChildPageSize(comment.commentId, size)" />
                     </div>
                   </div>
 
-                  <div v-if="replyTo?.commentId === comment.commentId" class="reply-input-wrapper">
+                  <div v-if="replyTo?.commentId === comment.commentId" class="reply-input-wrapper" ref="replyInputRef">
                     <el-input v-model="replyContent" type="textarea" :rows="2"
                       :placeholder="replyTo.toUser ? `回复 ${replyTo.toUser.userName}` : '写下你的回复...'" />
                     <div v-if="replyImage" class="uploaded-image">
-                      <el-image :src="replyImage" class="preview-image" :preview-src-list="[replyImage]" />
+                      <el-image :src="replyImage" class="preview-image" :preview-src-list="[replyImage]"
+                        :initial-index="0" preview-teleported />
                       <el-button type="danger" circle class="remove-image" @click="removeReplyImage">
                         <el-icon>
                           <Close />
@@ -204,7 +205,7 @@
 
             <div class="pagination-wrapper" v-if="total > 0">
               <el-pagination v-model:current-page="currentPage" v-model:page-size="pageSize" :total="total"
-                :page-sizes="[10, 20, 30, 50]" layout="total, sizes, prev, pager, next" @size-change="handleSizeChange"
+                :page-sizes="[10]" layout="total, sizes, prev, pager, next" @size-change="handleSizeChange"
                 @current-change="handleCurrentChange" />
             </div>
           </div>
@@ -215,7 +216,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import AppHeader from '@/components/AppHeader.vue'
 import { useArticleApi } from '@/services/modules/article'
@@ -250,6 +251,7 @@ const replyTo = ref<{
 } | null>(null)
 const commentImage = ref('')
 const replyImage = ref('')
+const replyInputRef = ref<HTMLElement | null>(null)
 
 // 子评论分页相关
 const expandedComments = ref<Set<string>>(new Set())
@@ -351,38 +353,38 @@ const loadComments = async () => {
 
     const { data = [], total: totalCount = 0 } = response
 
-    // 获取每个主评论的子评论和总数
-    const commentsWithReplies = await Promise.all(
-      data.map(async (comment) => {
-        try {
-          const childResponse = await useCommentApi.pageChild({
-            articleId: article.value!.articleId,
-            commentId: comment.commentId,
-            page: 1,
-            pageSize: 2  // 默认只加载2条子评论
-          })
-
-          if (childResponse) {
-            // 保存子评论总数
-            childCommentTotals.value.set(comment.commentId, childResponse.total)
-            return {
-              ...comment,
-              commentList: childResponse.data || []
-            }
-          }
-          return {
-            ...comment,
-            commentList: []
-          }
-        } catch (error) {
-          console.error('Failed to load child comments:', error)
-          return {
-            ...comment,
-            commentList: []
-          }
-        }
+    // 获取每个主评论的子评论和总数 - 改为并行请求
+    const childCommentsPromises = data.map(comment =>
+      useCommentApi.pageChild({
+        articleId: article.value!.articleId,
+        commentId: comment.commentId,
+        page: 1,
+        pageSize: 2  // 默认只加载2条子评论
+      }).catch(error => {
+        console.error('Failed to load child comments:', error)
+        return { data: [], total: 0 }
       })
     )
+
+    // 等待所有子评论请求完成
+    const childResponses = await Promise.all(childCommentsPromises)
+
+    // 将子评论数据合并到主评论中
+    const commentsWithReplies = data.map((comment, index) => {
+      const childResponse = childResponses[index]
+      if (childResponse) {
+        // 保存子评论总数
+        childCommentTotals.value.set(comment.commentId, childResponse.total)
+        return {
+          ...comment,
+          commentList: childResponse.data || []
+        }
+      }
+      return {
+        ...comment,
+        commentList: []
+      }
+    })
 
     comments.value = commentsWithReplies
     total.value = totalCount
@@ -443,6 +445,27 @@ const showReplyInput = (comment: CommentDTO, replyToComment?: CommentDTO) => {
   }
   replyContent.value = ''
   replyImage.value = ''
+  
+  // 使用 nextTick 确保 DOM 已更新后再滚动
+  nextTick(() => {
+    setTimeout(() => {
+      // 查找回复输入框元素
+      const replyInputElement = document.querySelector(
+        `.comment-item[data-comment-id="${comment.commentId}"] .reply-input-wrapper`
+      )
+      
+      if (replyInputElement) {
+        // 滚动到回复输入框
+        replyInputElement.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      } else {
+        // 如果找不到回复输入框，则滚动到评论元素
+        const commentElement = document.querySelector(`[data-comment-id="${comment.commentId}"]`)
+        if (commentElement) {
+          commentElement.scrollIntoView({ behavior: 'smooth', block: 'center' })
+        }
+      }
+    }, 100) // 短暂延迟确保DOM已更新
+  })
 }
 
 // 取消回复
@@ -569,7 +592,6 @@ const submitComment = async () => {
   }
 }
 
-// 修改提交回复的方法
 const submitReply = async () => {
   if (!userStore.userInfo || !replyTo.value) return
 
@@ -584,15 +606,30 @@ const submitReply = async () => {
       articleId: article.value!.articleId,
       commentContent: replyContent.value.trim(),
       commentImg: replyImage.value || undefined,
-      parentCommentId: replyTo.value.commentId,  // 修改这里，使用主评论的 ID
+      parentCommentId: replyTo.value.commentId,  // 使用主评论的 ID
       toUserId: replyTo.value.toUser?.userId
     })
     ElMessage.success('回复成功')
+    
+    // 保存当前评论的展开状态
+    const commentId = replyTo.value.commentId
+    const wasExpanded = expandedComments.value.has(commentId)
+    
+    // 清空回复状态
     replyContent.value = ''
     replyImage.value = ''
     replyTo.value = null
+    
     // 重新加载评论
     await loadComments()
+    
+    // 如果之前是展开状态，重新加载后也保持展开状态
+    if (wasExpanded) {
+      nextTick(() => {
+        expandedComments.value.add(commentId)
+        loadChildComments(commentId)
+      })
+    }
   } catch (error: any) {
     ElMessage.error(error.message || '回复失败')
   } finally {
@@ -664,8 +701,8 @@ const handleReplyImageUpload = async (options: any) => {
 }
 
 onMounted(async () => {
-  await loadArticle() // 等待文章加载完成
-  await loadComments() // 然后加载评论
+  await loadArticle()
+  await loadComments()
 })
 </script>
 
@@ -1210,6 +1247,15 @@ onMounted(async () => {
   padding-left: 0;
 }
 
+.reply-input-wrapper {
+  margin-top: 24px;
+  padding: 16px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #ebeef5;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
 /* 移动端适配 */
 @media (max-width: 768px) {
   .article-header {
@@ -1250,5 +1296,7 @@ onMounted(async () => {
     padding-bottom: 8px;
     margin-bottom: 8px;
   }
+
+
 }
 </style>

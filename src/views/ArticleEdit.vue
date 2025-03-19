@@ -100,7 +100,6 @@ const publishing = ref(false)
 const articleFormRef = ref<FormInstance>()
 const editorRef = shallowRef()
 
-// Move handleEditorUpload function here, before editorConfig
 const handleEditorUpload = async (file: File, callback: (url: string) => void) => {
   try {
     const formData = new FormData()
