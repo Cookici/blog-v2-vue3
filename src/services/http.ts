@@ -29,9 +29,9 @@ export class HttpClient {
     // 请求拦截器
     this.instance.interceptors.request.use(
       (config) => {
-        const userId = localStorage.getItem('userId');
-        if (userId) {
-          config.headers.HEADER_USER_ID = userId;
+        const token = localStorage.getItem('token');
+        if (token) {
+          config.headers.Authorization = "Bearer " + token;
         }
         return config;
       },
@@ -54,13 +54,13 @@ export class HttpClient {
           const { status, data } = error.response;
 
           if(status == 401){
-            localStorage.removeItem('userId');
+            localStorage.removeItem('token');
             localStorage.removeItem('userInfo');
             router.push('/login');
           }
 
           if (status === 403) {
-            localStorage.removeItem('userId');
+            localStorage.removeItem('token');
             localStorage.removeItem('userInfo');
             router.push('/login');
           }

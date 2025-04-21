@@ -4,7 +4,8 @@ import type {
   LoginParams, 
   RegisterParams, 
   RegisterResponse ,
-  UserSearchReq
+  UserSearchReq,
+  loginResponse
 } from '@/types/user';
 import { PageDTO } from '../types';
 
@@ -19,7 +20,7 @@ interface UserUpdateReq {
 export const useUserApi = {
   // 登录
   login(params: LoginParams) {
-    return http.post<UserInfo>('/user/login', params);
+    return http.post<loginResponse>('/user/login', params);
   },
 
   // 登出

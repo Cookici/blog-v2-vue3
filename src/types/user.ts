@@ -11,6 +11,11 @@ export interface UserInfo {
     userEmail: string;
     userPhoto: string;
   }
+
+  export interface loginResponse {
+    userInfo: UserInfo;
+    token: string;
+  }
   
   // API 相关接口
   export interface LoginParams {

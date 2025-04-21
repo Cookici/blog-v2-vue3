@@ -84,8 +84,9 @@ const handleLogin = async () => {
     if (valid) {
       try {
         loading.value = true;
-        const userInfo = await useUserApi.login(loginForm.value);
-        localStorage.setItem('userId', userInfo.userId);
+        const loginResponse = await useUserApi.login(loginForm.value);
+        const { userInfo, token } = loginResponse;
+        localStorage.setItem('token', token);
         const nowIp = await useUserApi.updateIp({userId: userInfo.userId});
         userInfo.userIp = nowIp;
         userStore.$patch({ userInfo });

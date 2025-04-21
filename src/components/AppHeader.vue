@@ -101,7 +101,7 @@ const handleLogout = async () => {
       await useUserApi.logout()
     }
     clearIpCache()
-    localStorage.removeItem('userId')
+    localStorage.removeItem('token')
     userStore.$reset()
     router.push('/login')
     ElMessage.success('退出成功')
