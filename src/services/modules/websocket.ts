@@ -1,6 +1,7 @@
 import { MessageVO, MessageType, MessageSend } from "@/types/message"
 import { ElMessage } from "element-plus";
 import mitt from 'mitt'
+import { useUserStore } from '@/stores/user'
 
 // 定义事件类型
 export type WebSocketEvents = {
@@ -42,16 +43,29 @@ export class WebSocketService {
   }
 
   // 连接WebSocket
-  connect(userId: string, autoReconnect = false) {
+  connect(autoReconnect = false) {
     if (this.ws?.readyState === WebSocket.OPEN) {
       console.log('WebSocket已经连接')
       return
     }
 
     this.autoReconnect = autoReconnect
-    const wsUrl = `${import.meta.env.VITE_WS_URL || 'ws://localhost:7001'}/api/netty?userId=${userId}`
-
-    // 创建自定义的WebSocket对象
+    
+    // 获取token
+    const token = localStorage.getItem('token')
+    if (!token) {
+      console.error('WebSocket连接失败: 未找到token')
+      ElMessage.error('WebSocket连接失败: 请先登录')
+      return
+    }
+    
+    // 设置cookie，这样WebSocket连接时会自动带上
+    document.cookie = `Authorization=${token}; path=/; SameSite=Strict`
+    
+    // 基础URL，不包含token
+    const wsUrl = `${import.meta.env.VITE_WS_URL || 'ws://localhost:7001'}/api/netty`
+    
+    // 创建WebSocket对象
     const socket = new WebSocket(wsUrl)
 
     this.ws = socket
@@ -130,7 +144,7 @@ export class WebSocketService {
     setTimeout(() => {
       const userId = localStorage.getItem('userId')
       if (userId) {
-        this.connect(userId, true)
+        this.connect(true)
       }
     }, this.reconnectDelay)
   }
@@ -138,11 +152,13 @@ export class WebSocketService {
   // 开始心跳
   private startHeartbeat() {
     this.heartbeatInterval = window.setInterval(() => {
+      const userStore = useUserStore()
+      const userId = userStore.userInfo?.userId || ''
       this.send({
         messageType: 'ping',
         messageContent: 'ping',
-        toUserId: localStorage.getItem('userId') || '',
-        userId: localStorage.getItem('userId') || '',
+        toUserId: userId,
+        userId: userId,
         timestamp: Date.now()
       })
     }, 30000) // 每30秒发送一次心跳
@@ -158,4 +174,4 @@ export class WebSocketService {
 }
 
 // 导出单例
-export const wsService = new WebSocketService() 
+export const wsService = new WebSocketService()

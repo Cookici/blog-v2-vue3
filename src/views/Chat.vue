@@ -778,7 +778,7 @@ const initWebSocket = () => {
     wsService.clearReconnectAttempts()
   }
 
-  wsService.connect(userId)
+  wsService.connect()
   wsService.setAutoReconnect(true)
   // 使用事件订阅替代重写方法
   wsService.events.on('message', (message) => {
