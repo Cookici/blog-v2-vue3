@@ -31,12 +31,12 @@
               />
             </el-form-item>
             
-            <el-form-item label="文章标签" prop="tags">
+            <el-form-item label="文章标签 (可选)" prop="tags">
               <el-select
                 v-model="articleForm.tags"
                 multiple
                 filterable
-                placeholder="请选择标签"
+                placeholder="请选择标签（可选）"
                 class="tag-select"
               >
                 <el-option
@@ -165,7 +165,7 @@ const rules: FormRules = {
     }
   ],
   tags: [
-    { required: true, message: '请至少选择一个标签', trigger: 'change' },
+    // 移除必选验证，只保留最大数量限制
     { type: 'array', max: 5, message: '最多选择5个标签', trigger: 'change' }
   ]
 }
@@ -216,7 +216,7 @@ const handlePublish = async () => {
         const params = {
           articleTitle: articleForm.value.title,
           articleContent: articleForm.value.content,
-          labelIdList: articleForm.value.tags
+          labelIdList: articleForm.value.tags.length > 0 ? articleForm.value.tags : [] // 确保空标签时传空数组
         }
 
         if (isEdit.value) {
@@ -364,4 +364,4 @@ onBeforeUnmount(() => {
     padding: 10px 15px;
   }
 }
-</style> 
+</style>
