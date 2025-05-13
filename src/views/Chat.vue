@@ -28,7 +28,11 @@
           </div>
         </div>
         <div class="contact-search">
-          <el-input v-model="searchQuery" placeholder="搜索好友" prefix-icon="Search" clearable />
+          <el-input v-model="searchQuery" placeholder="搜索好友" clearable>
+    <template #prefix>
+      <el-icon><Search /></el-icon>
+    </template>
+  </el-input>
         </div>
         <div class="contact-items">
           <div v-for="contact in filteredContacts" :key="contact.userInfo.userId" class="contact-item" :class="{
@@ -245,7 +249,7 @@ import { ref, computed, onMounted, nextTick, onBeforeUnmount } from 'vue'
 import { useUserStore } from '@/stores/user'
 import { storeToRefs } from 'pinia'
 import AppHeader from '@/components/AppHeader.vue'
-import { Picture, Loading, Plus, Setting, Bell, Close } from '@element-plus/icons-vue'
+import { Picture, Loading, Plus, Setting, Bell, Close,Search } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { wsService } from '@/services/modules/websocket'
 import dayjs from 'dayjs'
